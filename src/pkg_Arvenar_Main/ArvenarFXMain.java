@@ -15,7 +15,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
@@ -34,7 +33,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import javafx.stage.Window;
 
 /**
  *
@@ -72,7 +70,7 @@ public class ArvenarFXMain extends Application {
         Text exitGameHeaderText, exitGameYesText, exitGameNoText;
         
         BufferedReader readSettingsBR;
-        Window window;
+        
            
         
     @Override
@@ -88,14 +86,11 @@ public class ArvenarFXMain extends Application {
         weather = new Weather();
         gamemodegui = new ArvenarGameMode();
         ArvenarSettings gsettings = new ArvenarSettings();
-        
-        
+                
         arvfonts = new ArvenarFonts();
-        
-        Tooltip tt = new Tooltip();
+              
         paneElven = new Pane();
-        
-        
+          
                 
         mTxtVBox = new VBox();
         exitGameVBox = new VBox();
