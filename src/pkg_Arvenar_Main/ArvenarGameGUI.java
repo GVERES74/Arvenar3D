@@ -136,7 +136,7 @@ public class ArvenarGameGUI{
               
         worldSubScene = new SubScene(actors, 1920, 1080, true, SceneAntialiasing.BALANCED);
                
-        playableScreenXSize = ArvenarFXMain.resX-100; playableScreenYSize = ArvenarFXMain.resY-100;
+        playableScreenXSize = ArvenarFXMain.guiResolutionX-100; playableScreenYSize = ArvenarFXMain.guiResolutionY-100;
         
         SCREEN_MAX_X = 1200; 
         SCREEN_MAX_Y = 738;
@@ -162,7 +162,7 @@ public class ArvenarGameGUI{
         compass3d = objects3d.object3DCompass();
         compass3d.setLayoutX(110); compass3d.setLayoutY(240);
                               
-        infoText = arvfx.setTextEffect(infoText, arvfx.glowEffect, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.GOLD, ArvenarFXMain.resX/2, 50);
+        infoText = arvfx.setTextEffect(infoText, arvfx.glowEffect, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.GOLD, ArvenarFXMain.guiResolutionX/2, 50);
         dialogText = arvfx.setTextEffect(dialogText, null, null, Font.font("Verdana", FontWeight.BOLD, 18), Color.BEIGE, 0, 10);
         
         heroNameLabel = arvfx.setTextEffect(heroNameLabel, null, null, Font.font("Verdana", FontWeight.BOLD, 14), Color.HONEYDEW, 0, 0);
@@ -183,7 +183,7 @@ public class ArvenarGameGUI{
         dialogHBox.setStyle("-fx-background-color: rgba(128, 64, 128, 0.4); -fx-background-radius: 5; -fx-spacing: 10; -fx-padding: 10"); //transparent and rounded dialog box
         dialogHBox.setVisible(false);
         dialogHBox.getChildren().add(dialogText); 
-        dialogHBox.setLayoutX((ArvenarFXMain.resX/2)-(dialogHBox.getPrefWidth()/2)); dialogHBox.setLayoutY(ArvenarFXMain.resY-200);
+        dialogHBox.setLayoutX((ArvenarFXMain.guiResolutionX/2)-(dialogHBox.getPrefWidth()/2)); dialogHBox.setLayoutY(ArvenarFXMain.guiResolutionY-200);
         
                 
         //SUBPANE for controls, compass and buttons
@@ -537,8 +537,8 @@ public class ArvenarGameGUI{
                 hero3d = objects3d.object3DHero();
                 heroNameLabel.setText(objects3d.playerPC);
                 
-                hero3d.translateXProperty().set(ArvenarFXMain.resX/2);
-                hero3d.translateYProperty().set(ArvenarFXMain.resY-200);
+                hero3d.translateXProperty().set(ArvenarFXMain.guiResolutionX/2);
+                hero3d.translateYProperty().set(ArvenarFXMain.guiResolutionY-200);
                 hero3d.translateZProperty().set(500);
                 heroGroup.getChildren().add(hero3d);
                           

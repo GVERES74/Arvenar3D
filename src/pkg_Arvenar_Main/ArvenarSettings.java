@@ -38,9 +38,9 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import static pkg_Arvenar_Main.ArvenarFXMain.flagFullScreen;
-import static pkg_Arvenar_Main.ArvenarFXMain.resX;
-import static pkg_Arvenar_Main.ArvenarFXMain.resY;
 import static pkg_Arvenar_Main.ArvenarFXMain.stageElven;
+import static pkg_Arvenar_Main.ArvenarFXMain.guiResolutionX;
+import static pkg_Arvenar_Main.ArvenarFXMain.guiResolutionY;
 
 /**
  *
@@ -77,8 +77,8 @@ public class ArvenarSettings {
     ArvenarFonts arvfonts;
     ArvenarButtons arv_buttons = new ArvenarButtons();
     
-    int stageSizeX = ArvenarFXMain.resX;
-    int stageSizeY = ArvenarFXMain.resY;
+    int stageSizeX = ArvenarFXMain.guiResolutionX;
+    int stageSizeY = ArvenarFXMain.guiResolutionY;
     
     BufferedWriter settingsBW;
     
@@ -353,8 +353,8 @@ public class ArvenarSettings {
         
             settingsBW = new BufferedWriter(new FileWriter("c:\\Users\\te332168\\Documents\\NetBeansProjects\\Arvenar\\src\\settings.txt"));
             
-            settingsBW.write("ResX = "+ArvenarFXMain.resX);
-            settingsBW.write("ResY = "+ArvenarFXMain.resY);
+            settingsBW.write("ResX = "+ArvenarFXMain.guiResolutionX);
+            settingsBW.write("ResY = "+ArvenarFXMain.guiResolutionY);
             settingsBW.write("FullScreen = "+ArvenarFXMain.flagFullScreen);
             
             settingsBW.flush();

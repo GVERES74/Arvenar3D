@@ -64,7 +64,7 @@ static Weather weather = new Weather();
                 
         creditsPane.setBackground(new Background(new BackgroundImage(bkgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT)));
                 
-        escText = arvfonts.newTextFormat("Press ESC to back", escText, arveffects.setGlowEffect(0.0), arveffects.reflectionEffect, Font.font("Verdana", FontWeight.BOLD, 26), Color.CORAL, 50, ArvenarFXMain.resY-200);
+        escText = arvfonts.newTextFormat("Press ESC to back", escText, arveffects.setGlowEffect(0.0), arveffects.reflectionEffect, Font.font("Verdana", FontWeight.BOLD, 26), Color.CORAL, 50, ArvenarFXMain.guiResolutionY-200);
         
         creditsText = arvfonts.newTextFormat("", creditsText, arveffects.setGlowEffect(0.0), arveffects.shadowEffect, Font.font("Verdana", FontWeight.BOLD, 20), Color.AQUAMARINE, 50, 550);
       

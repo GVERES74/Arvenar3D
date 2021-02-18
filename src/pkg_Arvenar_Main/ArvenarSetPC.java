@@ -118,7 +118,7 @@ public class ArvenarSetPC {
             } catch (Exception ex) {
                 Logger.getLogger(ArvenarSetPC.class.getName()).log(Level.SEVERE, null, ex);
             }
-            ArvenarFXMain.stageElven.setScene(ArvenarExtras.extras_scene);
+            ArvenarFXMain.stageElven.setScene(ArvenarExtras.extrScene);
             
         });
         

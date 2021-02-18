@@ -33,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import javafx.scene.Node;
 
 /**
  *
@@ -41,10 +42,9 @@ import java.io.FileReader;
 public class ArvenarFXMain extends Application {
     
         Timer timer;
-        public static int resX = 1366;
-        public static int resY = 768;
+        public static int guiResolutionX = 1366;
+        public static int guiResolutionY = 768;
         
-        public static int windowSizeX, windowSizeY;
         static Stage stageElven;
         public static int flagFullScreen;
         static Scene sceneElven;
@@ -68,75 +68,44 @@ public class ArvenarFXMain extends Application {
         VBox exitGameVBox;
         VBox mTxtVBox;
         Text exitGameHeaderText, exitGameYesText, exitGameNoText;
+        Image bkgImage = new Image("img/bkg_main.jpg");
         
         BufferedReader readSettingsBR;
-        
-           
         
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("ArvenarFx.fxml"));
 
-        Arvenar_App elvenarapp = new Arvenar_App(); //Példányosítani kell, nem lehet direkt hivatkozni, mint pl. "Arvenar_App.fight()"!!
-        
         readSettingsBR = new BufferedReader(new FileReader("c:\\Users\\te332168\\Documents\\NetBeansProjects\\Arvenar\\src\\settings.txt"));
-        //resX = readSettingsBR.readLine();
-        
+               
         credits = new ArvenarCredits();
         weather = new Weather();
         gamemodegui = new ArvenarGameMode();
         ArvenarSettings gsettings = new ArvenarSettings();
                 
         arvfonts = new ArvenarFonts();
-              
+        
         paneElven = new Pane();
-          
                 
         mTxtVBox = new VBox();
         exitGameVBox = new VBox();
                 
-        Image bkgImage = new Image("img/bkg_main.jpg");
+        
         
         stageElven = new Stage();
-        stageElven.setTitle("Arvenar - Elven Tales - 2020 - by Gabor Veres"+" - Width: "+resX+" Height: "+resY+" FullScreen: "+flagFullScreen);
+        stageElven.setTitle("Arvenar - Elven Tales - 2020 - by Gabor Veres"+" - Width: "+guiResolutionX+" Height: "+guiResolutionY+" FullScreen: "+flagFullScreen);
         
-        paneElven.setBackground(new Background(new BackgroundImage(bkgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT)));
         
-        sceneElven = new Scene(paneElven, resX, resY);
+        
+        sceneElven = new Scene(paneElven, guiResolutionX, guiResolutionY);
                 
         stageElven.setResizable(false);
                        
         stageElven.setScene(sceneElven);
         
-        windowSizeX = resX; windowSizeY = resY;
         
-        mTxtVBox.setMaxHeight(300); mTxtVBox.setMaxWidth(400);
-        mTxtVBox.setLayoutX(50); mTxtVBox.setLayoutY(50);
-        mTxtVBox.setSpacing(20); 
-        mTxtVBox.setStyle("-fx-background-color: rgba(64, 50, 128, 0.2); -fx-background-radius: 5; -fx-padding: 30;"); //transparent and rounded VBox with padding
         
-        mTxtStartGame = arvfonts.newTextFormat("Start game", mTxtStartGame, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
-        mTxtSettings = arvfonts.newTextFormat("Game settings", mTxtSettings, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
-        mTxtExtras = arvfonts.newTextFormat("Extras", mTxtExtras, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
-        mTxtCredits = arvfonts.newTextFormat("Credits", mTxtCredits, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
-        mTxtExit = arvfonts.newTextFormat("Exit game", mTxtExit, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
-        versionText = arvfonts.newTextFormat("Arvenar GUI version - Build 01.12.20", versionText, null, arvfx.reflectionEffect, Font.font("Verdana", FontWeight.BOLD, 18), Color.CORAL, (int)mTxtVBox.getLayoutX(), windowSizeY-200);
-        exitGameHeaderText = arvfonts.newTextFormat("Exit game?", exitGameHeaderText, null, arvfx.shadowEffect, Font.font("Verdana", FontWeight.BOLD, 28), Color.DARKORANGE, 0, 0);
-        exitGameYesText = arvfonts.newTextFormat("Yes", exitGameYesText, null, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.CORAL, 0, 0);
-        exitGameNoText = arvfonts.newTextFormat("No", exitGameNoText, null, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.AQUA, 0, 0);
-                
-        mTxtVBox.getChildren().addAll(mTxtStartGame, mTxtSettings, mTxtExtras, mTxtCredits, mTxtExit);
-        
-        exitGameVBox.setMaxHeight(300); exitGameVBox.setMaxWidth(450);
-        exitGameVBox.setMinHeight(300); exitGameVBox.setMinWidth(450);
-        exitGameVBox.setAlignment(Pos.CENTER);
-        exitGameVBox.setSpacing(20); 
-        exitGameVBox.setStyle("-fx-background-color: rgba(64, 50, 128, 0.2); -fx-background-radius: 5; -fx-padding: 30;"); //transparent and rounded VBox with padding
-        exitGameVBox.getChildren().addAll(exitGameHeaderText, exitGameYesText, exitGameNoText);
-                     
-        paneElven.getChildren().addAll(mTxtVBox, versionText); 
-        
-        stageElven.setHeight(resY); stageElven.setWidth(resX);
+        stageElven.setHeight(guiResolutionY); stageElven.setWidth(guiResolutionX);
         
         
         stageElven.setFullScreen(flagFullScreen == 1 ? true : false);        
@@ -148,16 +117,12 @@ public class ArvenarFXMain extends Application {
         //createWeather(10);
         
         weather.createAnimation(paneElven, 0, 0, 1920, 1080,1);
+        
+        
+        createGUIElements();
                 
         //--------------------------------------------------------
-        arvfx.btnTextEffects(mTxtStartGame);
-        arvfx.btnTextEffects(mTxtSettings);
-        arvfx.btnTextEffects(mTxtExtras);
-        arvfx.btnTextEffects(mTxtCredits);
-        arvfx.btnTextEffects(mTxtExit);
         
-        arvfx.btnTextEffects(exitGameYesText);
-        arvfx.btnTextEffects(exitGameNoText);
         
         //--------------------------------------------------------
         
@@ -241,8 +206,8 @@ public class ArvenarFXMain extends Application {
     public void showExitMenuPopupPane(){
         
         if (!paneElven.getChildren().contains(exitGameVBox)){ 
-            exitGameVBox.setLayoutX((windowSizeX/2)-150);
-            exitGameVBox.setLayoutY((windowSizeY/2)-150);
+            exitGameVBox.setLayoutX((guiResolutionX/2)-150);
+            exitGameVBox.setLayoutY((guiResolutionY/2)-150);
             paneElven.getChildren().add(exitGameVBox);
             mTxtVBox.setDisable(true);
         }
@@ -267,7 +232,53 @@ public class ArvenarFXMain extends Application {
         delayer.start();
     }    
     
+    public void setLayouts(Node node, int xpos, int ypos){
+        node.setLayoutX(xpos);
+        node.setLayoutY(ypos);
+        
+    }
     
+    public void createGUIElements(){
+        
+        setLayouts(mTxtVBox, 50, 50);       
+        mTxtVBox.setMaxHeight(300); mTxtVBox.setMaxWidth(400);
+        
+        mTxtVBox.setSpacing(20); 
+        mTxtVBox.setStyle("-fx-background-color: rgba(64, 50, 128, 0.2); -fx-background-radius: 5; -fx-padding: 30;"); //transparent and rounded VBox with padding
+        
+        mTxtStartGame = arvfonts.newTextFormat("Start game", mTxtStartGame, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
+        mTxtSettings = arvfonts.newTextFormat("Game settings", mTxtSettings, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
+        mTxtExtras = arvfonts.newTextFormat("Extras", mTxtExtras, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
+        mTxtCredits = arvfonts.newTextFormat("Credits", mTxtCredits, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
+        mTxtExit = arvfonts.newTextFormat("Exit game", mTxtExit, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
+        versionText = arvfonts.newTextFormat("Arvenar GUI version - Build 01.12.20", versionText, null, arvfx.reflectionEffect, Font.font("Verdana", FontWeight.BOLD, 18), Color.CORAL, (int)mTxtVBox.getLayoutX(), guiResolutionY-200);
+        exitGameHeaderText = arvfonts.newTextFormat("Exit game?", exitGameHeaderText, null, arvfx.shadowEffect, Font.font("Verdana", FontWeight.BOLD, 28), Color.DARKORANGE, 0, 0);
+        exitGameYesText = arvfonts.newTextFormat("Yes", exitGameYesText, null, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.CORAL, 0, 0);
+        exitGameNoText = arvfonts.newTextFormat("No", exitGameNoText, null, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.AQUA, 0, 0);
+                
+        mTxtVBox.getChildren().addAll(mTxtStartGame, mTxtSettings, mTxtExtras, mTxtCredits, mTxtExit);
+        
+        exitGameVBox.setMaxHeight(300); exitGameVBox.setMaxWidth(450);
+        exitGameVBox.setMinHeight(300); exitGameVBox.setMinWidth(450);
+        exitGameVBox.setAlignment(Pos.CENTER);
+        exitGameVBox.setSpacing(20); 
+        exitGameVBox.setStyle("-fx-background-color: rgba(64, 50, 128, 0.2); -fx-background-radius: 5; -fx-padding: 30;"); //transparent and rounded VBox with padding
+        exitGameVBox.getChildren().addAll(exitGameHeaderText, exitGameYesText, exitGameNoText);
+                     
+        paneElven.setBackground(new Background(new BackgroundImage(bkgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT)));
+        paneElven.getChildren().addAll(mTxtVBox, versionText); 
+        
+        arvfx.btnTextEffects(mTxtStartGame);
+        arvfx.btnTextEffects(mTxtSettings);
+        arvfx.btnTextEffects(mTxtExtras);
+        arvfx.btnTextEffects(mTxtCredits);
+        arvfx.btnTextEffects(mTxtExit);
+        
+        arvfx.btnTextEffects(exitGameYesText);
+        arvfx.btnTextEffects(exitGameNoText);
+        
+        
+    }
     
     public static void main(String[] args) throws FileNotFoundException {
       Application.launch(args); //Kell az Application.launch();!!
