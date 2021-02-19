@@ -76,8 +76,9 @@ public class ArvenarFXMain extends Application {
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("ArvenarFx.fxml"));
 
+
         readSettingsBR = new BufferedReader(new FileReader("c:\\Users\\djver\\OneDrive\\Dokumentumok\\NetBeansProjects\\Arvenar\\src\\settings.txt"));
-               
+      
         credits = new ArvenarCredits();
         weather = new Weather();
         gamemodegui = new ArvenarGameMode();

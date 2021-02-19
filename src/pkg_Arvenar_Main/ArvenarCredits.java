@@ -95,7 +95,9 @@ static Weather weather = new Weather();
     public Text showCreditsText() throws InterruptedException{
         
      try {
+
                 creditsBR = new BufferedReader(new FileReader("c:\\Users\\djver\\OneDrive\\Dokumentumok\\NetBeansProjects\\Arvenar\\src\\credits.txt"));
+               
                     
             try { 
                 creditsBR.skip(1);
