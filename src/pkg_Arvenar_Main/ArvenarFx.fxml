@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<StackPane id="StackPane_Main_Elvenar" fx:id="StackPane_Main_Elvenar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <TitledPane prefHeight="406.0" prefWidth="600.0" text="Elvenar Tales">
+         <content>
+            <TextArea id="TextArea_Stage_Elvenar" fx:id="TextArea_Stage_Elvenar" layoutX="50.0" layoutY="50.0" maxHeight="200.0" maxWidth="400.0" prefHeight="200.0" prefWidth="400.0" />
+         </content>
+      </TitledPane>
+   </children>
+</StackPane>
