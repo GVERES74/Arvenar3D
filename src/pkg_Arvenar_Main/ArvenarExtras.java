@@ -5,7 +5,6 @@
  */
 package pkg_Arvenar_Main;
 
-import java.io.File;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -16,13 +15,10 @@ import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.AudioClip;
-import javafx.scene.media.Media;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /**
@@ -34,14 +30,12 @@ public class ArvenarExtras {
     Stage extrStage = new Stage();
     Pane extrPane = new Pane();
     Pane contentPane = new Pane();
-    VBox mp3PlayerVBox = new VBox();
+    
     static Scene extrScene;
     
     VBox mTxtVBox = new VBox();  
     Text xtrasSceneText = new Text("EXTRAS");
-    Text musicTitle;
-    Text mplayerTitle = new Text();
-    Button openFileButton = new Button("Open");
+    
     
     static Text mTxtPc, mTxtMaps, mTxtNpc, mTxtMusicPlayer;
     
@@ -64,7 +58,7 @@ public class ArvenarExtras {
         view_maps = new Arvenar_View_Maps();
         view_pc = new ArvenarSetPC() ;
         mp3player = new MPlayer();
-        musicTitle = new Text("Now playing: "+MPlayer.song);
+        
         extrStage.setTitle("Game extras");
         extrStage.setScene(extrScene);
         extrScene = new Scene(extrPane);
@@ -77,8 +71,7 @@ public class ArvenarExtras {
         mTxtMaps = arvfonts.newTextFormat("View maps", mTxtMaps, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 18), Color.CORAL, 0, 0);
         mTxtNpc = arvfonts.newTextFormat("NPC database", mTxtNpc, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 18), Color.CORAL, 0, 0);
         mTxtMusicPlayer = arvfonts.newTextFormat("Music Player", mTxtMusicPlayer, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 18), Color.CORAL, 0, 0);
-        musicTitle = arvfonts.newTextFormat("Now playing: "+MPlayer.song, musicTitle, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 12), Color.AQUAMARINE, 0, 0);               
-        mplayerTitle = arvfonts.newTextFormat("Ahoy Matey - Music Player", mplayerTitle, arvfx.shadowEffect, null, Font.font("Verdana", FontWeight.BOLD, 18), Color.BISQUE, 0, 0);               
+                 
 //---------- Extras menu text's properties-------------------------------------------------
         mTxtVBox.setLayoutX(50); mTxtVBox.setLayoutY(50);
         mTxtVBox.setMaxSize(350, 250); mTxtVBox.setMinSize(350, 250);
@@ -92,11 +85,7 @@ public class ArvenarExtras {
         contentPane.setTranslateX(450); contentPane.setTranslateY(50);
         contentPane.setMinHeight(600); contentPane.setMinWidth(800);
 
-        //------------Side pane for Music Player-----------------
-        mp3PlayerVBox.setStyle("-fx-background-color: rgba(0, 50, 50, 0.2); -fx-background-radius: 5; -fx-padding: 30;");
-        mp3PlayerVBox.setTranslateX(10); mp3PlayerVBox.setTranslateY(50);
-        mp3PlayerVBox.setMinHeight(400); mp3PlayerVBox.setMinWidth(600);
-        mp3PlayerVBox.getChildren().addAll(mplayerTitle, musicTitle, openFileButton);
+        
                 
 
 
@@ -106,8 +95,7 @@ public class ArvenarExtras {
         extrPane.getChildren().addAll(mTxtVBox, btnExit, contentPane);
                 
         arvfx.buttonEffects(btnExit);
-        arvfx.buttonEffects(openFileButton);
-                
+                        
         //---------------------------------------------------    
         
         btnExit.setOnAction(action -> {
@@ -195,7 +183,7 @@ public class ArvenarExtras {
         mTxtMusicPlayer.setOnMouseClicked(action -> {
                                    
             contentPane.getChildren().clear();
-            contentPane.getChildren().addAll(mp3PlayerVBox);            
+            contentPane.getChildren().add(mp3player.mPlayerPane);        
         
         });
         
@@ -214,29 +202,7 @@ public class ArvenarExtras {
             //elvenarapp.choose_Character();
         }); 
         
-        openFileButton.setOnMouseClicked(action -> {
-            
-            MPlayer.mPlayer_stop();
-            FileChooser mp3filechooser = new FileChooser();
-            
-            mp3filechooser.setInitialDirectory(new File("src/music"));
-            mp3filechooser.setTitle("Open MP3 Music Files");
-            mp3filechooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("MP3 files", "*.mp3"));
-            File selectedMP3file = mp3filechooser.showOpenDialog(extrStage);
-            
-            
-            String musicName = selectedMP3file.toURI().toString();
-            Media music = new Media(musicName);    
-            AudioClip mediaPlayerExtras = new AudioClip(music.getSource());
-            MPlayer.mediaPlayer = mediaPlayerExtras;
-            MPlayer.mediaPlayer.setCycleCount(5);
-            MPlayer.mediaPlayer.play();
-            musicTitle.setText("Now playing: "+musicName);
-            
-            System.out.println(musicName);
-                      
         
-        });
         
         contentPane.setOnMouseEntered(action -> {
             mTxtVBox.setScaleX(0.5); mTxtVBox.setScaleY(0.5);
