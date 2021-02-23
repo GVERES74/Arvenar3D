@@ -96,7 +96,7 @@ static Weather weather = new Weather();
         
      try {
 
-                creditsBR = new BufferedReader(new FileReader("c:\\Users\\djver\\OneDrive\\Dokumentumok\\NetBeansProjects\\Arvenar\\src\\credits.txt"));
+                creditsBR = new BufferedReader(new FileReader("src\\credits.txt"));
                
                     
             try { 

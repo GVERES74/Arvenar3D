@@ -12,11 +12,9 @@ import java.io.File;
 import java.nio.file.Paths;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.AudioClip;
@@ -42,71 +40,63 @@ public class MPlayer {
     VBox mp3PlayerVBox = new VBox();
     
     ComboBox ostCombo = new ComboBox();
-    static Text titleText = new Text("Music Player");
-    static Text musicTitle;
-    Text mplayerTitle;
-    static String song = new String();
+    static Text titleText, nowPlayingLabel, mPlayerAppName;
+    
+    static String ostFileName, ostURL, selectedSoundTrack;
+    static String ostPathName = new String("src/music/");
+    static String nowPlayingFileName = mediaPlayer.getSource();
        
     ArvenarFonts arvfonts = new ArvenarFonts();
     ArvenarEffects arvfx = new ArvenarEffects();
     ArvenarExtras arvextras;
+        
+    Button openFileButton = new Button("Open file");
     
-    
-    Button openFileButton = new Button("Open");
-    
+    //---------------------------------------------------------------------
     public MPlayer() throws Exception{
         
         
-        musicTitle = new Text("Now playing: "+song);
-        mplayerTitle = new Text("Ahoy Matey - Music Player");
-    
-        mPlayerPane.setStyle("-fx-background-color: rgba(64, 50, 64, 0.4); -fx-background-radius: 5; -fx-padding: 20;");
-        musicTitle = arvfonts.newTextFormat("Now playing: "+song, musicTitle, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 12), Color.AQUAMARINE, 0, 0);               
-        mplayerTitle = arvfonts.newTextFormat("Ahoy Matey - Music Player", mplayerTitle, arvfx.shadowEffect, null, Font.font("Verdana", FontWeight.BOLD, 18), Color.BISQUE, 0, 0);          
-        
-//------------Side pane for Music Player-----------------
-        mp3PlayerVBox.setStyle("-fx-background-color: rgba(0, 50, 50, 0.2); -fx-background-radius: 5; -fx-padding: 30;");
-        mp3PlayerVBox.setLayoutX(10); mp3PlayerVBox.setLayoutY(10);
-        mp3PlayerVBox.setMinHeight(400); mp3PlayerVBox.setMinWidth(600);
-        mp3PlayerVBox.getChildren().addAll(mplayerTitle, musicTitle, openFileButton, ostCombo);
-        
-        mPlayerPane.getChildren().add(mp3PlayerVBox);
+        buildMPlayerGUI();
         
         createSongList();
         
         openFileButton.setOnMouseClicked(action -> {
-            
-            mPlayer_stop();
+                        
             FileChooser mp3filechooser = new FileChooser();
-            mp3filechooser.setInitialDirectory(new File("src/music"));
+            mp3filechooser.setInitialDirectory(new File(ostPathName));
             mp3filechooser.setTitle("Open MP3 Music Files");
             mp3filechooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("MP3 files", "*.mp3"));
             File selectedMP3file = mp3filechooser.showOpenDialog(new Stage());
-                        
-            String musicName = selectedMP3file.toURI().toString();
-            Media music = new Media(musicName);    
-            AudioClip mediaPlayerExtras = new AudioClip(music.getSource());
-            mediaPlayer = mediaPlayerExtras;
-            MPlayer.mediaPlayer.setCycleCount(5);
-            mediaPlayer.play();
-            musicTitle.setText("Now playing: "+musicName);
+                if(selectedMP3file == null){ return;} //Cancel selection
             
-            System.out.println(musicName);
+            mPlayer_stop();
+            String filePath = selectedMP3file.getPath();
+            String selectedSoundTrackWithFullPath = selectedMP3file.toURI().toString();
+            selectedSoundTrack = selectedSoundTrackWithFullPath.replaceAll("file:/C:/Users/te332168/Documents/NetBeansProjects/Arvenar/src/music/", "");
+            
+            //ostCombo.setValue(selectedSoundTrack.replaceAll("file:/C:/Users/te332168/Documents/NetBeansProjects/Arvenar/src/music/", "")); //we want to see the opened file also in the combobox as selected ost
+            ostURL = filePath;
+            
+            initMediaPlayer();
+            
+            mediaPlayer.play();
+            
+            nowPlayingLabel.setText("Now playing: "+selectedSoundTrack+" (File path: "+filePath+")");
+            
+            System.out.println("Now opened as file and playing: "+selectedSoundTrack);
+            
                       
         
         });
     }
        
             
-    public static void mPlayer_start(String title, Boolean playing, int repeat) {
+    public static void mPlayer_start(String ostFileName, Boolean playing, int repeat) {
 
-    String theme = "src/music/"+title;
-    song = theme;
+    selectedSoundTrack = ostFileName; //Initial ost for the music player
+    ostURL = ostPathName+selectedSoundTrack;
     
-
-    Media music = new Media(Paths.get(theme).toUri().toString());    
-
-    mediaPlayer = new AudioClip(music.getSource());
+    initMediaPlayer();
           
 
       //MediaPlayer stops playing music afer 5-10 seconds --> use AudioClip instead
@@ -145,39 +135,66 @@ public class MPlayer {
     void createSongList(){
         
        
-        ostCombo.getItems().add("src/music/browse.mp3");
-        ostCombo.getItems().add("src/music/credits1.mp3");
-        ostCombo.getItems().add("src/music/journey.mp3");
-        ostCombo.getItems().add("src/music/main.mp3");
-        ostCombo.getItems().add("src/music/menu.mp3");
-        ostCombo.getItems().add("src/music/monastery.mp3");
-        ostCombo.getItems().add("src/music/outdoor.mp3");
-        ostCombo.getItems().add("src/music/tavern.mp3");
-        ostCombo.getItems().add("src/music/tavern2.mp3");
-        ostCombo.getItems().add("src/music/valley.mp3");
-        ostCombo.getItems().add("src/music/village.mp3");
+        ostCombo.getItems().add("browse.mp3");
+        ostCombo.getItems().add("credits1.mp3");
+        ostCombo.getItems().add("journey.mp3");
+        ostCombo.getItems().add("main.mp3");
+        ostCombo.getItems().add("menu.mp3");
+        ostCombo.getItems().add("monastery.mp3");
+        ostCombo.getItems().add("outdoor.mp3");
+        ostCombo.getItems().add("tavern.mp3");
+        ostCombo.getItems().add("tavern2.mp3");
+        ostCombo.getItems().add("valley.mp3");
+        ostCombo.getItems().add("village.mp3");
                 
         ostCombo.getSelectionModel().selectedItemProperty().addListener(new ChangeListener(){
             public void changed(ObservableValue observable, Object oldvalue, Object newvalue){
              
                 mPlayer_stop();
-                String soundTrack = ostCombo.getSelectionModel().getSelectedItem().toString();
+                selectedSoundTrack = ostCombo.getSelectionModel().getSelectedItem().toString();
                 
-                System.out.println(soundTrack);
+                System.out.println("Now selected from ComboBox and playing: "+selectedSoundTrack);
                          
+            ostURL = ostPathName+selectedSoundTrack;
+            //ostFileName = ; foreach ciklus a könyvtár tartalmának beolvasására
             
-            song = soundTrack;
-            Media music = new Media(Paths.get(song).toUri().toString());    
+            initMediaPlayer();
             
-            AudioClip mediaPlayerExtras = new AudioClip(music.getSource());
-            
-            mediaPlayer = mediaPlayerExtras;
-            musicTitle.setText("Now playing: "+song);
+            nowPlayingLabel.setText("Now playing: "+selectedSoundTrack);
             mediaPlayer.play();
             
         }});
         
         
+    }
+    
+    static void initMediaPlayer(){
+        
+        Media music = new Media(Paths.get(ostURL).toUri().toString());    
+        mediaPlayer = new AudioClip(music.getSource());
+        mediaPlayer.setCycleCount(5);
+        nowPlayingFileName = mediaPlayer.getSource();
+        System.out.println("Source: "+nowPlayingFileName);
+        
+    }
+    
+    void buildMPlayerGUI(){
+        
+        mPlayerPane.setStyle("-fx-background-color: rgba(64, 50, 64, 0.4); -fx-background-radius: 5; -fx-padding: 20;");
+        
+        nowPlayingLabel = new Text("Now playing: "+nowPlayingFileName);
+        mPlayerAppName = new Text("Ahoy Matey - Music Player");
+
+        nowPlayingLabel = arvfonts.newTextFormat("Now playing: "+nowPlayingFileName, nowPlayingLabel, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 12), Color.AQUAMARINE, 0, 0);               
+        mPlayerAppName = arvfonts.newTextFormat("Ahoy Matey - Music Player", mPlayerAppName, arvfx.shadowEffect, null, Font.font("Verdana", FontWeight.BOLD, 18), Color.BISQUE, 0, 0);          
+        
+        mp3PlayerVBox.setStyle("-fx-background-color: rgba(0, 50, 50, 0.2); -fx-background-radius: 5; -fx-padding: 30; -fx-spacing: 30");
+        mp3PlayerVBox.setLayoutX(10); mp3PlayerVBox.setLayoutY(10);
+        mp3PlayerVBox.setMinHeight(400); mp3PlayerVBox.setMinWidth(600);
+        mp3PlayerVBox.setAlignment(Pos.TOP_CENTER);
+        
+        mp3PlayerVBox.getChildren().addAll(mPlayerAppName, nowPlayingLabel, openFileButton, ostCombo);
+        mPlayerPane.getChildren().add(mp3PlayerVBox);
     }
 }   
   

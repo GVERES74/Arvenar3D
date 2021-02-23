@@ -29,7 +29,7 @@ public class Arvenar3DObjects {
     public Sphere pc_Hero = new Sphere();
     public Box npc_Pirate = new Box();
     public Cylinder npc_PirateBoss = new Cylinder(25,50);
-    public Box world3DBox = new Box(5000,5,5000);
+    public Box world3DBox = new Box(50000,5,50000);
         
     PhongMaterial globe3DMaterial = new PhongMaterial();
     public PhongMaterial heroAvatarMaterial = new PhongMaterial();    
@@ -67,7 +67,7 @@ public Sphere object3DHero() throws FileNotFoundException{
 }
 
 public Box object3DPirate() throws FileNotFoundException{
-    int boxSize = random.nextInt(50)+30; 
+    int boxSize = random.nextInt(50); 
     npc_Pirate = new Box();
     npc_Pirate.setDepth(boxSize);
     npc_Pirate.setWidth(boxSize);
@@ -104,7 +104,7 @@ public Sphere object3DCompass() throws FileNotFoundException{
 
 public Box object3DWorld() throws FileNotFoundException{
     
-    planeGroundMaterial.setDiffuseMap(new Image(new FileInputStream("src/img/skytop.jpg")));
+    planeGroundMaterial.setDiffuseMap(new Image(new FileInputStream("src/img/grass2.png")));
     planeGroundMaterial.setSpecularColor(color);
     //planeGroundMaterial.setDiffuseColor(Color.color(0, 0, 0, 0.8));
     
@@ -113,5 +113,19 @@ public Box object3DWorld() throws FileNotFoundException{
     return world3DBox;
 }
 
+public Box object3DWall(int width, int height, int depth, int xPos, int yPos, int zPos, String imageFileName) throws FileNotFoundException{
+    
+    Box wallName = new Box(width, height, depth);
+    wallName.translateXProperty().set(xPos);
+    wallName.translateYProperty().set(yPos);
+    wallName.translateZProperty().set(zPos);
+    
+    PhongMaterial wallPaper = new PhongMaterial();
+    wallPaper.setDiffuseMap(new Image(new FileInputStream("src/img/"+imageFileName)));
+    //wallpaper.setSpecularColor(color);
+    wallName.setMaterial(wallPaper);
+        
+    return wallName;
+}
 
 } //end Class

@@ -59,6 +59,8 @@ public class ArvenarFXMain extends Application {
                         
         static Text mTxtStartGame, mTxtSettings, mTxtExtras, mTxtCredits, mTxtExit, versionText;
         static double g, h;
+        String buildVerText = "Arvenar - 3D Version - Build. 23022021";
+
                 
         static Pane paneElven;
         static Timer delayer;
@@ -77,7 +79,7 @@ public class ArvenarFXMain extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("ArvenarFx.fxml"));
 
 
-        readSettingsBR = new BufferedReader(new FileReader("c:\\Users\\djver\\OneDrive\\Dokumentumok\\NetBeansProjects\\Arvenar\\src\\settings.txt"));
+        readSettingsBR = new BufferedReader(new FileReader("src\\settings.txt"));
       
         credits = new ArvenarCredits();
         weather = new Weather();
@@ -103,8 +105,6 @@ public class ArvenarFXMain extends Application {
         stageElven.setResizable(false);
                        
         stageElven.setScene(sceneElven);
-        
-        
         
         stageElven.setHeight(guiResolutionY); stageElven.setWidth(guiResolutionX);
         
@@ -252,7 +252,7 @@ public class ArvenarFXMain extends Application {
         mTxtExtras = arvfonts.newTextFormat("Extras", mTxtExtras, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
         mTxtCredits = arvfonts.newTextFormat("Credits", mTxtCredits, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
         mTxtExit = arvfonts.newTextFormat("Exit game", mTxtExit, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
-        versionText = arvfonts.newTextFormat("Arvenar GUI version - Build 01.12.20", versionText, null, arvfx.reflectionEffect, Font.font("Verdana", FontWeight.BOLD, 18), Color.CORAL, (int)mTxtVBox.getLayoutX(), guiResolutionY-200);
+        versionText = arvfonts.newTextFormat(buildVerText, versionText, null, arvfx.reflectionEffect, Font.font("Verdana", FontWeight.BOLD, 18), Color.CORAL, (int)mTxtVBox.getLayoutX(), guiResolutionY-200);
         exitGameHeaderText = arvfonts.newTextFormat("Exit game?", exitGameHeaderText, null, arvfx.shadowEffect, Font.font("Verdana", FontWeight.BOLD, 28), Color.DARKORANGE, 0, 0);
         exitGameYesText = arvfonts.newTextFormat("Yes", exitGameYesText, null, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.CORAL, 0, 0);
         exitGameNoText = arvfonts.newTextFormat("No", exitGameNoText, null, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.AQUA, 0, 0);
