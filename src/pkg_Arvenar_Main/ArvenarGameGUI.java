@@ -5,6 +5,7 @@
  */
 package pkg_Arvenar_Main;
 import java.io.FileNotFoundException;
+import static java.lang.Math.abs;
 import java.util.Random;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -24,7 +25,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
@@ -50,17 +50,18 @@ import pkg_Maps.Map_DataBase;
  */
 public class ArvenarGameGUI{
        
-    Stage gamestage = new Stage();
-    Pane gameMainPane = new Pane();
+    Stage gameRunStage = new Stage();
+    Pane game2DUILayoutPane = new Pane();
         
     VBox escPopUpVBox = new VBox();
     
     Pane controlsPane = new Pane();
     Pane popupPane = new Pane();
-    Scene gameMainScene = new Scene(gameMainPane);
-    SubScene worldSubScene;
-    Group world3DGroup = new Group();
+    Scene gameMainScene = new Scene(game2DUILayoutPane);
+    SubScene subScene3DWorld;
+    Group group3DWorld = new Group();
     Group uiControlGroup = new Group();
+    Group groupForHero = new Group();
     
     HBox dialogHBox = new HBox();
     ImageView pirateTooltipImageView, pirateDialogImageView, heroTooltipImageView;
@@ -88,6 +89,9 @@ public class ArvenarGameGUI{
     //Arvenar3DObjects 3dobjects; --> HIBALEHETŐSÉG: számmal nem kezdődhet az azonosító!!
     Arvenar3DObjects objects3d;
     Arvenar3DTransforms transform3d;
+    Arvenar3DObstacles obstacles3d = new Arvenar3DObstacles();
+    Arvenar3DTerrains terrains3d = new Arvenar3DTerrains();
+    Arvenar3DSkyBox skybox3d = new Arvenar3DSkyBox();
     
     Node hero3d, pirate3d, compass3d, selectednode;
                 
@@ -106,8 +110,8 @@ public class ArvenarGameGUI{
     private double anchorAngleY = 0;
     private final double MAXROTATIONANGLEX = 90; //does not flip over
     private final double MINROTATIONANGLEX = -90; //does not flip over
-    private final int DEFAULTMOVEMENTSPEED = 10;
-    private int speedModifier = 2;
+    private final int DEFAULTMOVEMENTSPEED = 20;
+    private int speedModifier = 5;
     private int currentSpeed;
     
     
@@ -132,16 +136,16 @@ public class ArvenarGameGUI{
         
     PerspectiveCamera pcamera1 = new PerspectiveCamera(true);
          
-    AmbientLight ambientlight = new AmbientLight();
-    PointLight pointlight1 = new PointLight(Color.BLUEVIOLET);
+    AmbientLight ambientlight;
+    PointLight pointlight1;
                     
     public ArvenarGameGUI() throws FileNotFoundException, InterruptedException{ //ez nem lehet void, különben üres stage-t kapsz vissza!!
         
         objects3d = new Arvenar3DObjects();
         transform3d = new Arvenar3DTransforms();
-        weather.createAnimation(gameMainPane, 0, 0, 1920, 1080,2);
+        weather.createAnimation(game2DUILayoutPane, 0, 0, 1920, 1080,2);
               
-        worldSubScene = new SubScene(world3DGroup, 1920, 1080, true, SceneAntialiasing.BALANCED);
+        subScene3DWorld = new SubScene(group3DWorld, 1366, 768, true, SceneAntialiasing.BALANCED);
                
         playableScreenXSize = ArvenarFXMain.guiResolutionX-100; playableScreenYSize = ArvenarFXMain.guiResolutionY-100;
         
@@ -208,9 +212,9 @@ public class ArvenarGameGUI{
         popupPane.getChildren().add(escPopUpVBox);
         
                 //GAMEMAINPANE - main pane 
-        gameMainPane.setBackground(new Background(new BackgroundImage(bkgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT)));
+        game2DUILayoutPane.setBackground(new Background(new BackgroundImage(bkgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT)));
         //gameMainPane.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
-        gameMainPane.getChildren().add(dialogHBox);
+        game2DUILayoutPane.getChildren().add(dialogHBox);
         
         //addLights();
               
@@ -231,50 +235,57 @@ public class ArvenarGameGUI{
                     {currentSpeed = DEFAULTMOVEMENTSPEED * speedModifier;}
                 if(kevent.isControlDown()) //crouch
                     {currentSpeed = DEFAULTMOVEMENTSPEED / speedModifier;}
-                
-                                            
+                                          
             switch  (kevent.getCode()){
                                                 
                 case W:  
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, -1, Rotate.X_AXIS);
-                transform3d.move3DNode(world3DGroup, 0, 0, -currentSpeed);
-                
+                transform3d.move3DNode(groupForHero, 0, 0,currentSpeed);
+                                                                
                 break;
 
                 case S: 
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, 1, Rotate.X_AXIS);
-                transform3d.move3DNode(world3DGroup, 0, 0, currentSpeed); 
-                
+                transform3d.move3DNode(groupForHero, 0, 0,-currentSpeed); 
                 
                 break;
 
                 case A: 
                 transform3d.rotateByXY(compass3d, 1, Rotate.Y_AXIS);
-                transform3d.move3DNode(world3DGroup, currentSpeed, 0, 0); 
+                
+                transform3d.move3DNode(groupForHero, -currentSpeed, 0, 0); 
                 break;
                                 
                 case D: 
                 transform3d.rotateByXY(compass3d, -1, Rotate.Y_AXIS);
-                transform3d.move3DNode(world3DGroup, -currentSpeed, 0, 0); 
+                
+                transform3d.move3DNode(groupForHero, currentSpeed, 0, 0); 
                 break;
                                 
-                case UP:  angleWorldX.set(angleWorldX.get()-1);
-                          angleHeroX.set(-angleWorldX.get()*5);  
+                case UP:  angleWorldX.set(angleWorldX.get()+1);
+                          angleHeroX.set(angleWorldX.get()*5);  
                 break;
                     
-                case DOWN: angleWorldX.set(angleWorldX.get()+1); 
-                           angleHeroX.set(-angleWorldX.get()*5);   
+                case DOWN: angleWorldX.set(angleWorldX.get()-1); 
+                           angleHeroX.set(angleWorldX.get()*5);   
                 break;
                     
-                case LEFT: angleWorldY.set(angleWorldY.get()+1); 
-                           angleHeroY.set(-angleWorldY.get()*5);   
+                case LEFT: angleWorldY.set(angleWorldY.get()-1); 
+                           angleHeroY.set(angleWorldY.get()*5);   
                 break;
                 
-                case RIGHT: angleWorldY.set(angleWorldY.get()-1); 
-                            angleHeroY.set(-angleWorldY.get()*5);   
+                case RIGHT: angleWorldY.set(angleWorldY.get()+1); 
+                            angleHeroY.set(angleWorldY.get()*5);   
                 break;
+                
+                case Q: groupForHero.translateYProperty().set(groupForHero.getTranslateY()-50);
+                break;
+                
+                case E: groupForHero.translateYProperty().set(groupForHero.getTranslateY()+50);
+                break;
+                
                 
                 case ESCAPE: showPauseMenuPopupPane(); break;
             }
@@ -284,33 +295,32 @@ public class ArvenarGameGUI{
                 System.out.println("AngleX: "+angleWorldX);
                     
             });
-            
-            
+                        
         
 //Mouse events
             
             hero3d.setOnMouseEntered(action -> {
-                gameMainPane.getChildren().addAll(heroTooltipImageView, heroNameLabel);
+                game2DUILayoutPane.getChildren().addAll(heroTooltipImageView, heroNameLabel);
                 heroTooltipImageView.setFitHeight(50); heroTooltipImageView.setFitWidth(50);
-                heroTooltipImageView.setTranslateX(hero3d.getTranslateX()+20);
-                heroTooltipImageView.setTranslateY(hero3d.getTranslateY()-20);
-                heroTooltipImageView.setTranslateZ(hero3d.getTranslateZ()-10);
+                heroTooltipImageView.setTranslateX(500);
+                heroTooltipImageView.setTranslateY(500);
+                heroTooltipImageView.setTranslateZ(0);
                 
                 heroNameLabel.translateXProperty().set(heroTooltipImageView.getTranslateX());
                 heroNameLabel.translateYProperty().set(heroTooltipImageView.getTranslateY()-10);
             });
                         
             hero3d.setOnMouseExited(action -> {
-            gameMainPane.getChildren().removeAll(heroTooltipImageView, heroNameLabel);
+            game2DUILayoutPane.getChildren().removeAll(heroTooltipImageView, heroNameLabel);
             
             });
         
         
             pirate3d.setOnMouseEntered(action -> {
-                gameMainPane.getChildren().addAll(pirateTooltipImageView, pirateNameLabel);
+                game2DUILayoutPane.getChildren().addAll(pirateTooltipImageView, pirateNameLabel);
                 pirateTooltipImageView.setFitHeight(50); pirateTooltipImageView.setFitWidth(50);
-                pirateTooltipImageView.translateXProperty().set(hero3d.getTranslateX());
-                pirateTooltipImageView.translateYProperty().set(hero3d.getTranslateY()-100);
+                pirateTooltipImageView.translateXProperty().set(500);
+                pirateTooltipImageView.translateYProperty().set(500);
                 pirateTooltipImageView.translateZProperty().set(0);
                 
                 pirateNameLabel.translateXProperty().set(pirateTooltipImageView.getTranslateX());
@@ -319,7 +329,7 @@ public class ArvenarGameGUI{
         
         
             pirate3d.setOnMouseExited(action -> {
-                gameMainPane.getChildren().removeAll(pirateTooltipImageView, pirateNameLabel);
+                game2DUILayoutPane.getChildren().removeAll(pirateTooltipImageView, pirateNameLabel);
             
             });
         
@@ -334,22 +344,20 @@ public class ArvenarGameGUI{
         
         
             gameMainScene.setOnMouseDragged((MouseEvent mevent) -> {
-                angleWorldX.set(anchorAngleX - (anchorY - mevent.getSceneY()));
-                angleWorldY.set(anchorAngleY + anchorX - mevent.getSceneX());
-                angleHeroX.set(-angleWorldX.get()); //hero looks in the opposite direction of world
-                angleHeroY.set(-angleWorldY.get());
+                
+                angleWorldX.set(anchorAngleX - (mevent.getSceneY()- anchorY));
+                angleWorldY.set(anchorAngleY + mevent.getSceneX() - anchorX);
+                System.out.println("angleWorldX: "+angleWorldX.get()+" / angleWorldY: "+angleWorldY.get());
+                angleHeroX.set(angleWorldX.get()); //hero looks in the opposite direction of world
+                angleHeroY.set(angleWorldY.get());
                 
                 checkRotationAngles();
-                
-                    if (mevent.isMiddleButtonDown()){
-                    pcamera1.translateYProperty().set(pcamera1.getTranslateY()+angleHeroX.get());
-                    }
-                    
+                 
             });
             
             gameMainScene.setOnScroll((ScrollEvent event) ->{
                 double deltaY = event.getDeltaY();
-                world3DGroup.setTranslateZ(world3DGroup.getTranslateZ()+deltaY);
+                groupForHero.setTranslateZ(groupForHero.getTranslateZ()+deltaY);
                 
             });
         
@@ -368,8 +376,8 @@ public class ArvenarGameGUI{
                 selectednode = pcamera1;
             });
             
-            world3DGroup.setOnMouseClicked((MouseEvent event) ->{
-                selectednode = world3DGroup;
+            group3DWorld.setOnMouseClicked((MouseEvent event) ->{
+                selectednode = group3DWorld;
             });
             
             
@@ -401,12 +409,14 @@ public class ArvenarGameGUI{
                 
             moveUpButton.setOnAction(action -> {
                 check_HeroPos();
-                pcamera1.translateYProperty().set(pcamera1.getTranslateY()-100);
+                pcamera1.translateZProperty().set(pcamera1.getTranslateZ()-100);
+                System.out.println("CamZ: "+pcamera1.getTranslateZ());
             });
         
             moveDownButton.setOnAction(action -> {
                 check_HeroPos();
-                pcamera1.translateYProperty().set(pcamera1.getTranslateY()+100);
+                pcamera1.translateZProperty().set(pcamera1.getTranslateZ()+100);
+                System.out.println("CamZ: "+pcamera1.getTranslateZ());
             });
         
             moveLeftButton.setOnAction(action -> {
@@ -449,42 +459,45 @@ public class ArvenarGameGUI{
     
     public void initPerspectiveCamera(){
         pcamera1.setNearClip(0.1); // ha setNearClip(1.0), akkor üres kezdőháttered lesz!!
-        pcamera1.setFarClip(50000);
-        pcamera1.setTranslateZ(-1000);
-        pcamera1.setTranslateY(-500);
-                
-        worldSubScene.setCamera(pcamera1);
-                
+        pcamera1.setFarClip(100000);
+        Translate cameraTranslate = new Translate(0,-500,-10000);
+        pcamera1.getTransforms().add(cameraTranslate);
+        
+        subScene3DWorld.setCamera(pcamera1);
+             
         
     };
     
     public void addLights(){
-        pointlight1.getScope().add(hero3d);
-        pointlight1.getTransforms().add(new Translate(50, -50, -50));
+        ambientlight = new AmbientLight();
         ambientlight.setColor(Color.AZURE);
-        gameMainPane.getChildren().add(pointlight1);
-        world3DGroup.getChildren().add(ambientlight);
+        
+        pointlight1 = new PointLight(Color.GREEN);
+        pointlight1.getTransforms().add(new Translate(500,-1000,500));
+        
+        group3DWorld.getTransforms().addAll(pointlight1.getTransforms());
+        group3DWorld.getChildren().addAll(ambientlight, pointlight1);
     }
     
     public void initRotationControl() { //applies both mouse and keyboard control
        
-        Rotate xRotateWorld, xRotateHero;
-        Rotate yRotateWorld, yRotateHero;
+        Rotate xRotateHeroCam, xRotateHero;
+        Rotate yRotateHeroCam, yRotateHero;
         
                 
-        world3DGroup.getTransforms().addAll(
-               xRotateWorld = new Rotate(0, Rotate.X_AXIS),
-               yRotateWorld = new Rotate(0, Rotate.Y_AXIS)
+        groupForHero.getTransforms().addAll(xRotateHeroCam = new Rotate(0,Rotate.X_AXIS),
+               yRotateHeroCam = new Rotate(0, Rotate.Y_AXIS)
                );
         
         hero3d.getTransforms().addAll(
                 xRotateHero = new Rotate(0, Rotate.X_AXIS), 
-                yRotateHero = new Rotate(0, Rotate.Y_AXIS)
-                ); //bind counter direction of hero3d to the group rotate together
+                yRotateHero = new Rotate(0, Rotate.Y_AXIS));
+                //bind counter direction of hero3d to the group rotate together
                 
-               xRotateWorld.angleProperty().bind(angleWorldX);
-               yRotateWorld.angleProperty().bind(angleWorldY);
-               
+               xRotateHeroCam.angleProperty().bind(angleWorldX);
+               yRotateHeroCam.angleProperty().bind(angleWorldY);
+              
+                                             
                xRotateHero.angleProperty().bind(angleHeroX);
                yRotateHero.angleProperty().bind(angleHeroY);
                
@@ -517,7 +530,7 @@ public class ArvenarGameGUI{
     }
       
     public void show_GameGUI(){
-        gamestage.show();
+        gameRunStage.show();
     }
 
     public void addPirates() throws FileNotFoundException{ //Add pirates to the map
@@ -531,14 +544,14 @@ public class ArvenarGameGUI{
            pirateTooltipImageView = new ImageView(Arvenar3DObjects.pirateImg);
            pirateDialogImageView = new ImageView(Arvenar3DObjects.pirateImg);
           
-           rx = random.nextInt(1500);
-           ry = -25;
+           rx = random.nextInt(1300)-200;
+           ry = -125;
            rz = random.nextInt(1000)+100;
                     
            pirate3d.setTranslateX(rx); 
            pirate3d.setTranslateY(ry); 
            pirate3d.setTranslateZ(rz);
-           world3DGroup.getChildren().add(pirate3d);
+           group3DWorld.getChildren().add(pirate3d);
         
         //}
     }   
@@ -550,11 +563,10 @@ public class ArvenarGameGUI{
                 //NOT USED: heroImage = Arvenar3DObjects.heroImg;                
                 heroTooltipImageView = new ImageView(Arvenar3DObjects.heroImg);
                
-                hero3d.translateXProperty().set(ArvenarFXMain.guiResolutionX/2);
-                hero3d.translateYProperty().set(ArvenarFXMain.guiResolutionY-100);
-                hero3d.translateZProperty().set(500);
-                gameMainPane.getChildren().add(hero3d);
-                          
+                hero3d.getTransforms().addAll(new Translate(0,-100,1000));
+                groupForHero.getChildren().addAll(hero3d, pcamera1);
+                
+                group3DWorld.getChildren().add(groupForHero);
                 
                 infoText.setText("Hero "+objects3d.playerPC+" is playing on current map: "+dbaseMAPS.get_Random_Map().getMap_name()); //for selected map
                 
@@ -562,16 +574,21 @@ public class ArvenarGameGUI{
        
        
     public void createWorld() throws FileNotFoundException{
+               
+              
+        skybox3d.buildSkyBox(group3DWorld);
+        obstacles3d.buildWalls(group3DWorld);
+        //terrains3d.buildTerrain(group3DWorld);
+        
+        /*group3DWorld.getChildren().add(objects3d.object3DWall(50000, 50000, 5, 0, -1000, 25000, "skyworld.png", "skyworld.png"));
+        group3DWorld.getChildren().add(objects3d.object3DWall(50000, 50000, 5, 0, -1000, -25000, "skyworld.png", "skyworld.png"));
+        group3DWorld.getChildren().add(objects3d.object3DWall(5, 50000, 50000, -25000, -1000, 0, "skyworld.png", "skyworld.png"));
+        group3DWorld.getChildren().add(objects3d.object3DWall(5, 50000, 50000, 25000, -1000, 0, "skyworld.png", "skyworld.png"));*/
                 
-        world3DGroup.getChildren().add(objects3d.object3DWall(50000, 2000, 5, 0, -1000, 25000, "forest.png"));
-        world3DGroup.getChildren().add(objects3d.object3DWall(50000, 2000, 5, 0, -1000, -25000, "forest.png"));
-        world3DGroup.getChildren().add(objects3d.object3DWall(5, 2000, 50000, -25000, -1000, 0, "forest.png"));
-        world3DGroup.getChildren().add(objects3d.object3DWall(5, 2000, 50000, 25000, -1000, 0, "forest.png"));
-        world3DGroup.getChildren().add(objects3d.object3DWall(50000, 5, 50000, 0, -5, 0, "grass.jpg"));
         
         
-        world3DGroup.translateYProperty().set(ArvenarFXMain.guiResolutionY-100);
-        world3DGroup.translateXProperty().set(ArvenarFXMain.guiResolutionX/2);
+        
+        group3DWorld.getTransforms().addAll(new Translate(ArvenarFXMain.guiResolutionX/2, ArvenarFXMain.guiResolutionY-100, 5000));
         
         addHero();
         addPirates();
@@ -594,17 +611,17 @@ public class ArvenarGameGUI{
        
        public void clearGameUI(){
         
-            world3DGroup.getChildren().clear();
+            group3DWorld.getChildren().clear();
             
             uiControlGroup.getChildren().clear();
-            gameMainPane.getChildren().removeAll(controlsPane, worldSubScene, uiControlGroup, infoText, hero3d);
+            game2DUILayoutPane.getChildren().removeAll(controlsPane, subScene3DWorld, uiControlGroup, infoText);
                        
        }
    
        public void resetGameUI() throws FileNotFoundException{
        
-           gameMainPane.getChildren().addAll(controlsPane, worldSubScene, uiControlGroup, infoText); //...hogy mindig legfelülre kerüljön a controlPanelVBox layer
-           //weather.createAnimation(gameMainPane, 0, 0, 1920, 1080, (int)Math.round(Math.random()*2));
+           game2DUILayoutPane.getChildren().addAll(controlsPane, subScene3DWorld, uiControlGroup, infoText); //...hogy mindig legfelülre kerüljön a controlPanelVBox layer
+           //weather.createAnimation(game2DUILayoutPane, 0, 0, 1920, 1080, (int)Math.round(Math.random()*2));
        }
        
        public Scene game_Scene(){
@@ -614,14 +631,14 @@ public class ArvenarGameGUI{
       
     public void showPauseMenuPopupPane(){
         
-        if (!gameMainPane.getChildren().contains(popupPane)){ 
-            popupPane.setLayoutX((gameMainPane.getWidth()/2)-300);
-            popupPane.setLayoutY((gameMainPane.getHeight()/2)-250);
-            gameMainPane.getChildren().add(popupPane);
+        if (!game2DUILayoutPane.getChildren().contains(popupPane)){ 
+            popupPane.setLayoutX((game2DUILayoutPane.getWidth()/2)-300);
+            popupPane.setLayoutY((game2DUILayoutPane.getHeight()/2)-250);
+            game2DUILayoutPane.getChildren().add(popupPane);
             controlsPane.setDisable(true);
         }
-        else if (gameMainPane.getChildren().contains(popupPane)){
-            gameMainPane.getChildren().remove(popupPane);
+        else if (game2DUILayoutPane.getChildren().contains(popupPane)){
+            game2DUILayoutPane.getChildren().remove(popupPane);
             controlsPane.setDisable(false);
         } 
     }

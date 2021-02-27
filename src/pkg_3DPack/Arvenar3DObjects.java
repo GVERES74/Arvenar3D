@@ -14,6 +14,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.Sphere;
+import javafx.scene.transform.Translate;
 import pkg_Characters.Character_DataBase_NPC;
 import pkg_Characters.Character_DataBase_PC;
 import pkg_Characters.NPC;
@@ -41,6 +42,7 @@ public class Arvenar3DObjects {
     public Character_DataBase_PC dbasePC = new Character_DataBase_PC();
 
     public String playerPC, playerNPC, playerNPCBoss;
+    private String imagesDirectory = "src/img/";
     public Playable_Character pc = dbasePC.getRandomPC(); //declare the playable character
     public NPC npc = dbaseNPC.getRandomNPC(); //declare a non-playable character
     
@@ -56,7 +58,7 @@ public Arvenar3DObjects() throws FileNotFoundException{
 
 public Sphere object3DHero() throws FileNotFoundException{
     pc_Hero = new Sphere();
-    pc_Hero.setRadius(50.0);
+    pc_Hero.setRadius(200.0);
     heroTextureImage = new FileInputStream(pc.getAvatarimg());
     heroImg = new Image(heroTextureImage);
     heroAvatarMaterial.setDiffuseMap(heroImg);
@@ -67,7 +69,7 @@ public Sphere object3DHero() throws FileNotFoundException{
 }
 
 public Box object3DPirate() throws FileNotFoundException{
-    int boxSize = random.nextInt(50); 
+    int boxSize = 250; 
     npc_Pirate = new Box();
     npc_Pirate.setDepth(boxSize);
     npc_Pirate.setWidth(boxSize);
@@ -76,6 +78,7 @@ public Box object3DPirate() throws FileNotFoundException{
     pirateTextureImage = new FileInputStream(npc.getAvatarimg());
     pirateImg = new Image(pirateTextureImage);
     pirateMaterial.setDiffuseMap(pirateImg);
+    //pirateMaterial.setBumpMap(new Image(new FileInputStream(imagesDirectory+"bump1.jpg")));
     pirateMaterial.setSpecularColor(color);
     npc_Pirate.setMaterial(pirateMaterial);
     playerNPC = npc.getFname();
@@ -96,32 +99,34 @@ public Cylinder object3DPirateBoss() throws FileNotFoundException{
 public Sphere object3DCompass() throws FileNotFoundException{
     compass3d = new Sphere();
     compass3d.setRadius(50);
-    globe3DMaterial.setDiffuseMap(new Image(new FileInputStream("src/img/earth.jpg")));
+    globe3DMaterial.setDiffuseMap(new Image(new FileInputStream(imagesDirectory+"earth.jpg")));
     globe3DMaterial.setSpecularColor(color);
     compass3d.setMaterial(globe3DMaterial);
     return compass3d;
 }
 
-public Box object3DWorld() throws FileNotFoundException{
+public Box object3DTerrain(int width, int height, int depth, int xPos, int yPos, int zPos, String diffuseMap, String bumpMap) throws FileNotFoundException{
     
-    planeGroundMaterial.setDiffuseMap(new Image(new FileInputStream("src/img/grass2.png")));
-    planeGroundMaterial.setSpecularColor(color);
-    //planeGroundMaterial.setDiffuseColor(Color.color(0, 0, 0, 0.8));
-    
-    world3DBox.setMaterial(planeGroundMaterial);
+    Box terrainName = new Box(width, height, depth);
+    terrainName.getTransforms().addAll(new Translate(xPos, yPos, zPos));
         
-    return world3DBox;
+    PhongMaterial groundType = new PhongMaterial();
+    groundType.setDiffuseMap(new Image(new FileInputStream(imagesDirectory+diffuseMap)));
+    groundType.setBumpMap(new Image(new FileInputStream(imagesDirectory+bumpMap)));
+    groundType.setSpecularColor(color);
+    terrainName.setMaterial(groundType);
+        
+    return terrainName;
 }
 
-public Box object3DWall(int width, int height, int depth, int xPos, int yPos, int zPos, String imageFileName) throws FileNotFoundException{
+public Box object3DWall(int width, int height, int depth, int xPos, int yPos, int zPos, String diffuseMap, String bumpMap) throws FileNotFoundException{
     
     Box wallName = new Box(width, height, depth);
-    wallName.translateXProperty().set(xPos);
-    wallName.translateYProperty().set(yPos);
-    wallName.translateZProperty().set(zPos);
-    
+    wallName.getTransforms().addAll(new Translate(xPos, yPos, zPos));
+        
     PhongMaterial wallPaper = new PhongMaterial();
-    wallPaper.setDiffuseMap(new Image(new FileInputStream("src/img/"+imageFileName)));
+    wallPaper.setDiffuseMap(new Image(new FileInputStream(imagesDirectory+diffuseMap)));
+    wallPaper.setBumpMap(new Image(new FileInputStream(imagesDirectory+bumpMap)));
     //wallpaper.setSpecularColor(color);
     wallName.setMaterial(wallPaper);
         

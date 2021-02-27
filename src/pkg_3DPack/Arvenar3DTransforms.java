@@ -57,6 +57,7 @@ public class Arvenar3DTransforms {
                       
            node.translateZProperty().set(node.getTranslateZ()+zpos);
            node.translateXProperty().set(node.getTranslateX()+xpos);
+           node.translateYProperty().set(node.getTranslateY()+ypos);
            
     }
 }
