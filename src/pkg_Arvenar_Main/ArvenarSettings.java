@@ -5,10 +5,7 @@
  */
 package pkg_Arvenar_Main;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -37,10 +34,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import static pkg_Arvenar_Main.ArvenarFXMain.flagFullScreen;
-import static pkg_Arvenar_Main.ArvenarFXMain.stageElven;
-import static pkg_Arvenar_Main.ArvenarFXMain.guiResolutionX;
-import static pkg_Arvenar_Main.ArvenarFXMain.guiResolutionY;
 
 /**
  *
@@ -49,15 +42,19 @@ import static pkg_Arvenar_Main.ArvenarFXMain.guiResolutionY;
 public class ArvenarSettings {
   
     Stage settings_stage = new Stage();
-    Pane settingsMainPane, audio_pane, video_pane, popUpPane;
+    Pane settingsMainPane, audio_pane, video_pane, controlsPane, popUpPane;
     static Scene settings_scene;
     
     GridPane settingsGridPane;
     VBox addSettingsVBox;
     VBox acceptChangesVBox;
     VBox exitSettingsVBox;
+    
     CheckBox checkBoxMusicOn = new CheckBox();
     CheckBox cbFullScreen = new CheckBox();
+    CheckBox cbInvertMouse = new CheckBox();
+    CheckBox cbInvertKeyBoard = new CheckBox();
+    
     ChoiceBox cbResolution = new ChoiceBox();
     Slider volumeSlider = new Slider(0,100,50);
     Label slider_music_label = new Label("Music volume:");
@@ -65,10 +62,14 @@ public class ArvenarSettings {
     Label label_music = new Label("Music On / Off");
     Label label_is_Fullscreen = new Label("Fullscreen On / Off");
     Label labelResolution = new Label("Select display resolution");
+    Label lbInvertMouse = new Label("Invert Mouse");
+    Label lbInvertKeyBoard = new Label("Invert KeyBoard");
     Tooltip volumeSlider_Tooltip = new Tooltip();
     Text sceneText = new Text("SETTINGS");
     Text audioGroupText = new Text("Audio settings");
     Text videoGroupText = new Text("Video settings");
+    Text controlsGroupText = new Text("Mouse and Keyboard settings");
+    
     Text acceptChangesText, cancelChangesText, changesOptionText, addSettingsText, acceptExitText, cancelExitText, exitSettingsText = new Text();
     static Text mTxtPlayMusic, mTxtStopMusic;
     Button btnAccept, btnExit;
@@ -92,6 +93,7 @@ public class ArvenarSettings {
         popUpPane = new Pane();
         audio_pane = new Pane();
         video_pane = new Pane();
+        controlsPane = new Pane();
         settingsMainPane = new Pane();
         
                 
@@ -106,6 +108,7 @@ public class ArvenarSettings {
         mTxtStopMusic = arvfonts.newTextFormat("Stop music", mTxtStopMusic, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 12), Color.CORAL, 0, 0); //stopButton.setPrefWidth(150); stopButton.setGraphic(new ImageView(new Image("file:\\c:\\Users\\te332168\\Documents\\NetBeansProjects\\Arvenar\\src\\img\\music_stop.png"))); stopButton.setTooltip(new Tooltip("Stop music"));
         audioGroupText = arvfonts.newTextFormat("Audio settings", audioGroupText, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 18), Color.GOLD, 0, 0);
         videoGroupText = arvfonts.newTextFormat("Video settings", videoGroupText, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 18), Color.GOLD, 0, 0);
+        controlsGroupText = arvfonts.newTextFormat("Control settings", controlsGroupText, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 18), Color.GOLD, 0, 0);
         addSettingsText = arvfonts.newTextFormat("Additional settings", addSettingsText, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 18), Color.GOLD, 0, 0);
         acceptChangesText = arvfonts.newTextFormat("Accept", acceptChangesText, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 18), Color.RED, 0, 10);
         cancelChangesText = arvfonts.newTextFormat("Cancel", cancelChangesText, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 18), Color.RED, 0, 10);
@@ -115,7 +118,7 @@ public class ArvenarSettings {
         exitSettingsText = arvfonts.newTextFormat("Exit to Main Menu?", changesOptionText, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 26), Color.RED, 0, 0);
         
         //---------------- Audio box and properties-------------------------------------------------
-        //audio_pane.setLayoutX(50); audio_pane.setLayoutY(50);
+        
         audio_pane.setMaxSize(350, 110); audio_pane.setMinSize(350, 110);
         audio_pane.setStyle("-fx-background-color: rgba(0, 50, 50, 0.2); -fx-background-radius: 5;");
         
@@ -134,7 +137,7 @@ public class ArvenarSettings {
         
         //---------------- Video box and properties-------------------------------------------------
         
-        //video_pane.setLayoutX(50); video_pane.setLayoutY(200);
+        
         video_pane.setMaxSize(350, 110); video_pane.setMinSize(350, 110);
         video_pane.setStyle("-fx-background-color: rgba(0, 50, 50, 0.2); -fx-background-radius: 5;");
         
@@ -149,9 +152,22 @@ public class ArvenarSettings {
         sceneText = arvfx.setTextEffect(sceneText, arvfx.setGlowEffect(0.5), null, Font.font("Verdana", FontWeight.BOLD, 36), Color.SILVER, 50, stageSizeY-200);
         video_pane.getChildren().addAll(videoGroupText, label_is_Fullscreen, cbFullScreen, labelResolution, cbResolution);
         System.out.println(stageSizeX+" / "+stageSizeY);
-        /*settings_stage.setMinWidth(800);
-        settings_stage.setMinHeight(600);
-        settings_stage.initModality(Modality.APPLICATION_MODAL);*/
+        
+        //----------- Mouse and Keyboard control box----------------------------------------------
+        controlsPane.setMaxSize(350, 110); controlsPane.setMinSize(350, 110);
+        controlsPane.setStyle("-fx-background-color: rgba(0, 50, 50, 0.2); -fx-background-radius: 5;");
+        controlsGroupText.setLayoutX(10); controlsGroupText.setLayoutY(30);
+        lbInvertMouse.setLayoutX(10); lbInvertMouse.setLayoutY(40);
+        lbInvertMouse.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+        lbInvertKeyBoard.setLayoutX(10); lbInvertKeyBoard.setLayoutY(60);
+        lbInvertKeyBoard.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+        cbInvertMouse.setLayoutX(150); cbInvertMouse.setLayoutY(40);
+        cbInvertKeyBoard.setLayoutX(150); cbInvertKeyBoard.setLayoutY(60);
+        cbInvertMouse.setSelected(false);
+        cbInvertKeyBoard.setSelected(false);
+        
+        controlsPane.getChildren().addAll(controlsGroupText, lbInvertMouse, lbInvertKeyBoard, cbInvertMouse, cbInvertKeyBoard);
+        
         
                 
         //---------- Option menu text's properties-------------------------------------------------
@@ -184,11 +200,12 @@ public class ArvenarSettings {
         settingsGridPane.add(audio_pane, 0,0);
         settingsGridPane.add(video_pane, 0,1);        
         settingsGridPane.add(addSettingsVBox, 1,0);        
-        settingsGridPane.add(btnAccept, 1,1);
-        settingsGridPane.add(btnExit, 1,2);                
+        settingsGridPane.add(controlsPane, 1,1);        
+        settingsGridPane.add(btnAccept, 2,0);
+        settingsGridPane.add(btnExit, 2,1);                
         settingsGridPane.setAlignment(Pos.CENTER);
         settingsGridPane.setVgap(20); settingsGridPane.setHgap(20);
-        //settingsGridPane.setStyle("-fx-background-color: rgba(0, 50, 50, 0.6); -fx-background-radius: 5; -fx-padding: 20;");
+        
         
         //---------- Pack all children nodes-------------------------------------------------
         settingsMainPane.setBackground(new Background(new BackgroundImage(new Image("/img/bkg_settings.jpg"), BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT)));
@@ -297,6 +314,13 @@ public class ArvenarSettings {
               
         });
         
+        cbInvertMouse.setOnAction(action ->{
+            ArvenarGameGUI.invertedMouse = (cbInvertMouse.isSelected() ? 1 : -1);
+        });
+        
+        cbInvertKeyBoard.setOnAction(action ->{
+            ArvenarGameGUI.invertedKeyBoard = (cbInvertKeyBoard.isSelected() ? 1 : -1);
+        });
         
         cancelChangesText.setOnMouseClicked(action -> {
             popUpPane.getChildren().remove(acceptChangesVBox);

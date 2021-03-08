@@ -20,10 +20,14 @@ import javafx.scene.SubScene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -45,24 +49,26 @@ import pkg_Maps.Map_DataBase;
  */
 public class ArvenarGameGUI{
        
-    Stage gamestage = new Stage();
-    Pane gameMainPane = new Pane();
+    Stage gameRunStage = new Stage();
+    Pane game2DUILayoutPane = new Pane();
+    Pane world3DPane = new Pane();
         
     VBox escPopUpVBox = new VBox();
     
     Pane controlsPane = new Pane();
     Pane popupPane = new Pane();
-    Scene gameMainScene = new Scene(gameMainPane);
-    SubScene worldSubScene;
-    Group actors = new Group();
-    Group heroGroup = new Group();
-    Group controlGroup = new Group();
-    
+    Scene gameMainScene = new Scene(game2DUILayoutPane);
+    SubScene subScene3DWorld;
+        
+    Group group3DWorld = new Group();
+    Group uiControlGroup = new Group();
+    Group cameraGroup = new Group();
+        
     HBox dialogHBox = new HBox();
     ImageView pirateTooltipImageView, pirateDialogImageView, heroTooltipImageView;
     Image heroImage, pirateImage;
     
-    Image bkgImage = new Image("img/bkg_main.jpg", 1366 , 768, true, false, true);
+    Image bkgImage = new Image("img/skyworld.png", 1920, 1080, true, false, true);
     
     Text dialogText = new Text();
     Text infoText = new Text();
@@ -84,8 +90,11 @@ public class ArvenarGameGUI{
     //Arvenar3DObjects 3dobjects; --> HIBALEHETŐSÉG: számmal nem kezdődhet az azonosító!!
     Arvenar3DObjects objects3d;
     Arvenar3DTransforms transform3d;
+    Arvenar3DObstacles obstacles3d = new Arvenar3DObstacles();
+    Arvenar3DTerrains terrains3d = new Arvenar3DTerrains();
+    Arvenar3DSkyBox skybox3d = new Arvenar3DSkyBox();
     
-    Node hero3d, pirate3d, compass3d, selectednode, world3d;
+    Node player3D, pirate3d, compass3d, selectednode;
                 
     int hero_x = 300, hero_y = 150;
     int pirate_x = 205, pirate_y = 175;
@@ -96,15 +105,26 @@ public class ArvenarGameGUI{
     private final DoubleProperty angleWorldY = new SimpleDoubleProperty(0);
     private final DoubleProperty angleHeroX = new SimpleDoubleProperty(0);
     private final DoubleProperty angleHeroY = new SimpleDoubleProperty(0);
-    
+        
     private double anchorX, anchorY;
     private double anchorAngleX = 0;
     private double anchorAngleY = 0;
+    
+    //min - max rotation angles (x,y)
     private final double MAXROTATIONANGLEX = 90; //does not flip over
-    private final double MINROTATIONANGLEX = -5; //does not flip over
+    private final double MINROTATIONANGLEX = -90; //does not flip over
+    private final double MAXROTATIONANGLEY = 360; 
+    private final double MINROTATIONANGLEY = 1; 
     
+    //movement values (speed when walk, crouch and sprint)
+    private final double DEFAULTMOVEMENTSPEED = 20;
+    private double speedModifier = 5;
+    private double currentSpeed;
     
+    static int invertedMouse =-1;
+    static int invertedKeyBoard =-1;
     
+       
     int playableScreenXSize; //(int)(ArvenarFXMain.stageElven.getWidth() / 2);
     int playableScreenYSize; //(int)(ArvenarFXMain.stageElven.getHeight() / 2);
     final int SCREEN_MAX_X;
@@ -123,19 +143,22 @@ public class ArvenarGameGUI{
         
     Random random = new Random();
         
-    PerspectiveCamera pcamera1 = new PerspectiveCamera(true);
+    PerspectiveCamera playerCamera;
          
-    AmbientLight ambientlight = new AmbientLight();
-    PointLight pointlight1 = new PointLight(Color.BLUEVIOLET);
+        
+    Rotate xRotateCam, yRotateCam, zRotateCam, xRotateWorld, yRotateWorld, zRotateWorld, xRotateHero, yRotateHero;
+    Translate translateCam, translateWorld;
                     
     public ArvenarGameGUI() throws FileNotFoundException, InterruptedException{ //ez nem lehet void, különben üres stage-t kapsz vissza!!
         
+        playerCamera = new PerspectiveCamera(true);
         objects3d = new Arvenar3DObjects();
         transform3d = new Arvenar3DTransforms();
-        weather.createAnimation(gameMainPane, 0, 0, 1920, 1080,2);
-              
-        worldSubScene = new SubScene(actors, 1920, 1080, true, SceneAntialiasing.BALANCED);
-               
+                      
+        subScene3DWorld = new SubScene(group3DWorld, 1920, 1080, true, SceneAntialiasing.BALANCED);
+        group3DWorld.getChildren().add(world3DPane);
+        weather.createAnimation(world3DPane, 0, 0, 1920, 1080,2);
+                
         playableScreenXSize = ArvenarFXMain.guiResolutionX-100; playableScreenYSize = ArvenarFXMain.guiResolutionY-100;
         
         SCREEN_MAX_X = 1200; 
@@ -146,7 +169,9 @@ public class ArvenarGameGUI{
        
        initNewGame(); 
        initPerspectiveCamera();
-       initRotationControl();
+       initCameraTransforms();
+       initWorldTransforms();
+       createBindings();
         
         //------------------------------------------------------
         
@@ -201,10 +226,9 @@ public class ArvenarGameGUI{
         popupPane.getChildren().add(escPopUpVBox);
         
                 //GAMEMAINPANE - main pane 
-        //gameMainPane.setBackground(new Background(new BackgroundImage(bkgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT)));
-        gameMainPane.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
-        gameMainPane.getChildren().add(dialogHBox);
-        
+        game2DUILayoutPane.setBackground(new Background(new BackgroundImage(bkgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT)));
+        //gameMainPane.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
+        game2DUILayoutPane.getChildren().add(dialogHBox);
         
         
         //addLights();
@@ -218,87 +242,113 @@ public class ArvenarGameGUI{
         
 //Keyboard events
     //*i have tryed to implement here also the mouse control rotation logic, so that we can use here the same code now
-        gameMainScene.setOnKeyPressed(event ->{ 
+        gameMainScene.setOnKeyPressed((KeyEvent kevent)->{ 
+        
+            printOutInfo();
             
-                //anchorX = angleWorldX.get(); //angle values should be read directly when the key pressed, otherwise the mouse control fails to work at the same time
-                //anchorY = angleWorldY.get();
+            currentSpeed = DEFAULTMOVEMENTSPEED;
                 
-                            
-            switch  (event.getCode()){
+                if(kevent.isShiftDown()) //run
+                    {currentSpeed = DEFAULTMOVEMENTSPEED * speedModifier;}
+                if(kevent.isControlDown()) //crouch
+                    {currentSpeed = DEFAULTMOVEMENTSPEED / speedModifier;}
+                                          
+            switch  (kevent.getCode()){
+                                                
                 case W:  
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, -1, Rotate.X_AXIS);
-                transform3d.move3DNode(actors, 0, 0, -10);
-                
+                translateWorld.setZ(translateWorld.getZ()-currentSpeed);
+                             
                 break;
 
                 case S: 
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, 1, Rotate.X_AXIS);
-                transform3d.move3DNode(actors, 0, 0, 10); 
                 
+                translateWorld.setZ(translateWorld.getZ()+currentSpeed);
                 
+                                
                 break;
 
                 case A: 
                 transform3d.rotateByXY(compass3d, 1, Rotate.Y_AXIS);
-                transform3d.move3DNode(actors, 10, 0, 0); 
+                translateWorld.setX(translateWorld.getX()+currentSpeed);
+                
+                
                 break;
                                 
                 case D: 
                 transform3d.rotateByXY(compass3d, -1, Rotate.Y_AXIS);
-                transform3d.move3DNode(actors, -10, 0, 0); 
+                translateWorld.setX(translateWorld.getX()-currentSpeed);
+                                
                 break;
                                 
-                case UP:  angleWorldX.set(angleWorldX.get()-1);
-                          angleHeroX.set(-angleWorldX.get()*5);  
+                case UP:  
+                           angleWorldX.set(angleWorldX.get()+invertedKeyBoard);
+                           angleHeroX.set(angleWorldX.get()*2); //hero looks in the opposite direction of world
+                
                 break;
                     
-                case DOWN: angleWorldX.set(angleWorldX.get()+1); 
-                           angleHeroX.set(-angleWorldX.get()*5);   
+                case DOWN: 
+                           angleWorldX.set(angleWorldX.get()-invertedKeyBoard);
+                           angleHeroX.set(angleWorldX.get()*2); //hero looks in the opposite direction of world
                 break;
                     
-                case LEFT: angleWorldY.set(angleWorldY.get()+1); 
-                           angleHeroY.set(-angleWorldY.get()*5);   
+                case LEFT: 
+                           angleWorldY.set(angleWorldY.get()-invertedKeyBoard);
+                           angleHeroY.set(angleWorldY.get()*2);
+                                          
                 break;
                 
-                case RIGHT: angleWorldY.set(angleWorldY.get()-1); 
-                            angleHeroY.set(-angleWorldY.get()*5);   
+                case RIGHT:
+                           angleWorldY.set(angleWorldY.get()+invertedKeyBoard);
+                           angleHeroY.set(angleWorldY.get()*2);
+                           
                 break;
+                
+                case Q: 
+                        playerCamera.translateYProperty().set(playerCamera.getTranslateY()-50);
+                break;
+                
+                case E: 
+                        playerCamera.translateYProperty().set(playerCamera.getTranslateY()+50);
+                break;
+                
                 
                 case ESCAPE: showPauseMenuPopupPane(); break;
             }
                     checkRotationAngles();
-                    System.out.println("Distance from zeroZ: "+actors.getTranslateZ());
+                   
             });
-            
-            
+        
+                 
         
 //Mouse events
             
-            hero3d.setOnMouseEntered(action -> {
-                gameMainPane.getChildren().addAll(heroTooltipImageView, heroNameLabel);
+            player3D.setOnMouseEntered(action -> {
+                game2DUILayoutPane.getChildren().addAll(heroTooltipImageView, heroNameLabel);
                 heroTooltipImageView.setFitHeight(50); heroTooltipImageView.setFitWidth(50);
-                heroTooltipImageView.setTranslateX(hero3d.getTranslateX()+20);
-                heroTooltipImageView.setTranslateY(hero3d.getTranslateY()-20);
-                heroTooltipImageView.setTranslateZ(hero3d.getTranslateZ()-10);
+                heroTooltipImageView.setTranslateX(500);
+                heroTooltipImageView.setTranslateY(500);
+                heroTooltipImageView.setTranslateZ(0);
                 
                 heroNameLabel.translateXProperty().set(heroTooltipImageView.getTranslateX());
                 heroNameLabel.translateYProperty().set(heroTooltipImageView.getTranslateY()-10);
             });
                         
-            hero3d.setOnMouseExited(action -> {
-            gameMainPane.getChildren().removeAll(heroTooltipImageView, heroNameLabel);
+            player3D.setOnMouseExited(action -> {
+            game2DUILayoutPane.getChildren().removeAll(heroTooltipImageView, heroNameLabel);
             
             });
         
         
             pirate3d.setOnMouseEntered(action -> {
-                gameMainPane.getChildren().addAll(pirateTooltipImageView, pirateNameLabel);
+                game2DUILayoutPane.getChildren().addAll(pirateTooltipImageView, pirateNameLabel);
                 pirateTooltipImageView.setFitHeight(50); pirateTooltipImageView.setFitWidth(50);
-                pirateTooltipImageView.translateXProperty().set(hero3d.getTranslateX()+50);
-                pirateTooltipImageView.translateYProperty().set(hero3d.getTranslateY()-50);
-                pirateTooltipImageView.translateZProperty().set(hero3d.getTranslateZ());
+                pirateTooltipImageView.translateXProperty().set(500);
+                pirateTooltipImageView.translateYProperty().set(500);
+                pirateTooltipImageView.translateZProperty().set(0);
                 
                 pirateNameLabel.translateXProperty().set(pirateTooltipImageView.getTranslateX());
                 pirateNameLabel.translateYProperty().set(pirateTooltipImageView.getTranslateY()-10);
@@ -306,13 +356,14 @@ public class ArvenarGameGUI{
         
         
             pirate3d.setOnMouseExited(action -> {
-                gameMainPane.getChildren().removeAll(pirateTooltipImageView, pirateNameLabel);
+                game2DUILayoutPane.getChildren().removeAll(pirateTooltipImageView, pirateNameLabel);
             
             });
         
             gameMainScene.setOnMousePressed((MouseEvent mevent) -> { //prepare values for mouse rotation
                 anchorX = mevent.getSceneX();
                 anchorY = mevent.getSceneY();
+               
                 anchorAngleX = angleWorldX.get();
                 anchorAngleY = angleWorldY.get();
                            
@@ -321,48 +372,31 @@ public class ArvenarGameGUI{
         
         
             gameMainScene.setOnMouseDragged((MouseEvent mevent) -> {
-                angleWorldX.set(anchorAngleX - (anchorY - mevent.getSceneY()));
-                angleWorldY.set(anchorAngleY + anchorX - mevent.getSceneX());
-                angleHeroX.set(-angleWorldX.get()); //hero looks in the opposite direction of world
-                angleHeroY.set(-angleWorldY.get());
+                
+                printOutInfo();
+                
+                angleWorldX.set(anchorAngleX - (mevent.getSceneY() - anchorY)*invertedMouse);
+                angleWorldY.set(anchorAngleY + (mevent.getSceneX() - anchorX)*invertedMouse);
                 
                 checkRotationAngles();
+                                
+                angleHeroX.set(angleWorldX.get()*2); //hero looks in the opposite direction of world
+                angleHeroY.set(angleWorldY.get()*2);
                 
-                    if (mevent.isMiddleButtonDown()){
-                    pcamera1.translateYProperty().set(pcamera1.getTranslateY()+angleHeroX.get());
-                    }
-                    
             });
             
             gameMainScene.setOnScroll((ScrollEvent event) ->{
                 double deltaY = event.getDeltaY();
-                actors.setTranslateZ(actors.getTranslateZ()+deltaY);
+                playerCamera.setTranslateY(playerCamera.getTranslateY()+deltaY);
+                
+                
             });
         
 //select nodes - only for the tests
-            hero3d.setOnMouseClicked((MouseEvent event) ->{
-                selectednode = hero3d;
+            player3D.setOnMouseClicked((MouseEvent event) ->{
+                selectednode = player3D;
             });
-            
-                            
-            pirate3d.setOnMouseClicked((MouseEvent event) ->{
-                selectednode = pirate3d;
-            });
-            
-            
-            world3d.setOnMouseClicked((MouseEvent event) ->{
-                selectednode = world3d;
-            });
-            
-            compass3d.setOnMouseClicked((MouseEvent event) ->{
-                selectednode = pcamera1;
-            });
-            
-            actors.setOnMouseClicked((MouseEvent event) ->{
-                selectednode = actors;
-            });
-            
-            
+           
            
 //Menu control
             btnExitGame.setOnAction(action -> {
@@ -391,22 +425,25 @@ public class ArvenarGameGUI{
                 
             moveUpButton.setOnAction(action -> {
                 check_HeroPos();
-                pcamera1.translateYProperty().set(pcamera1.getTranslateY()-100);
+                playerCamera.translateZProperty().set(playerCamera.getTranslateZ()+100);
+                playerCamera.translateYProperty().set(playerCamera.getTranslateY()+10);
             });
         
             moveDownButton.setOnAction(action -> {
                 check_HeroPos();
-                pcamera1.translateYProperty().set(pcamera1.getTranslateY()+100);
+                playerCamera.translateZProperty().set(playerCamera.getTranslateZ()-100);
+                playerCamera.translateYProperty().set(playerCamera.getTranslateY()-10);
+                
             });
         
             moveLeftButton.setOnAction(action -> {
                 check_HeroPos();
-                pcamera1.translateXProperty().set(pcamera1.getTranslateX()-100);
+                playerCamera.translateXProperty().set(playerCamera.getTranslateX()-100);
             });
         
             moveRightButton.setOnAction(action -> {
                 check_HeroPos();
-                pcamera1.translateXProperty().set(pcamera1.getTranslateX()+100);
+                playerCamera.translateXProperty().set(playerCamera.getTranslateX()+100);
             });
         
             //----------------------------------------------- 
@@ -431,61 +468,104 @@ public class ArvenarGameGUI{
         clearDialogUI();
         clearGameUI();
         resetGameUI();
+        createControlGUI();
         createWorld();
+               
+    }
+    
+    
+    public void createBindings(){ 
+    //HA nem bindel-ed a pivot point-okat, akkor jó a cameraZ irány, de a pivot marad 0,0
+    //HA bindel-ed a pivot point-okat, akkor NEM jó a cameraZ irány, de a pivot is megy
+        
+        xRotateWorld.angleProperty().bind(angleWorldX);
+        yRotateWorld.angleProperty().bind(angleWorldY);
+                
+        //yRotateCam.pivotZProperty().bind(translateCam.zProperty());
+        //yRotateCam.pivotXProperty().bind(translateCam.xProperty());
+        
+        xRotateHero.angleProperty().bind(angleHeroX);
+        yRotateHero.angleProperty().bind(angleHeroY);
         
                 
+        
     }
     
     public void initPerspectiveCamera(){
-        pcamera1.setNearClip(0.1); // ha setNearClip(1.0), akkor üres kezdőháttered lesz!!
-        pcamera1.setFarClip(50000);
-        pcamera1.setTranslateZ(-1000);
-        pcamera1.setTranslateY(-500);
-                
-        worldSubScene.setCamera(pcamera1);
-                
+        playerCamera.setNearClip(0.1); // ha setNearClip(1.0), akkor üres kezdőháttered lesz!!
+        playerCamera.setFarClip(100000);
+        playerCamera.setFieldOfView(40);
+        playerCamera.getTransforms().addAll(new Translate(0,0,0));
+        
+        cameraGroup.getChildren().addAll(playerCamera);
+        //group3DWorld.getChildren().addAll(cameraGroup);
+        subScene3DWorld.setCamera(playerCamera);
         
     };
     
     public void addLights(){
-        pointlight1.getScope().add(hero3d);
-        pointlight1.getTransforms().add(new Translate(50, -50, -50));
+        AmbientLight ambientlight = new AmbientLight();
         ambientlight.setColor(Color.AZURE);
-        gameMainPane.getChildren().add(pointlight1);
-        actors.getChildren().add(ambientlight);
+        
+        PointLight pointlight1 = new PointLight(Color.GREEN);
+        pointlight1.getTransforms().add(new Translate(0,-100,100));
+        
+        group3DWorld.getTransforms().addAll(pointlight1.getTransforms());
+        group3DWorld.getChildren().addAll(ambientlight, pointlight1);
     }
     
-    public void initRotationControl() { //applies both mouse and keyboard control
-       
-        Rotate xRotateWorld, xRotateHero;
-        Rotate yRotateWorld, yRotateHero;
-        
-        actors.getTransforms().addAll(
-               xRotateWorld = new Rotate(0, Rotate.X_AXIS),
-               yRotateWorld = new Rotate(0, Rotate.Y_AXIS)
-               );
-        
-        hero3d.getTransforms().addAll(
-                xRotateHero = new Rotate(0, Rotate.X_AXIS), 
-                yRotateHero = new Rotate(0, Rotate.Y_AXIS)
-                ); //bind counter direction of hero3d to the group rotate together
-                
-               xRotateWorld.angleProperty().bind(angleWorldX);
-               yRotateWorld.angleProperty().bind(angleWorldY);
+    public void initWorldTransforms() { //applies both mouse and keyboard control
+                     
+               xRotateWorld = new Rotate(0,Rotate.X_AXIS);
+               yRotateWorld = new Rotate(0,Rotate.Y_AXIS);
+               zRotateWorld = new Rotate(0,Rotate.Z_AXIS); 
+               translateWorld = new Translate(0,0,0);
                
-               xRotateHero.angleProperty().bind(angleHeroX);
-               yRotateHero.angleProperty().bind(angleHeroY);
+        group3DWorld.getTransforms().addAll(xRotateWorld, yRotateWorld, zRotateWorld, translateWorld);
+                
+                xRotateHero = new Rotate(0,0,0,0,Rotate.X_AXIS);
+                yRotateHero = new Rotate(0,0,0,0,Rotate.Y_AXIS);
+                
+        player3D.getTransforms().addAll(xRotateHero, yRotateHero);
+               
                
         }
     
-    public void checkRotationAngles(){ //X-axis rotationangles shouldn't flip over -5 and 90 grades 
-        if (angleWorldX.get() > MAXROTATIONANGLEX){
+    
+    public void initCameraTransforms() { //applies both mouse and keyboard control
+                     
+               xRotateCam = new Rotate(0,Rotate.X_AXIS);
+               yRotateCam = new Rotate(0,Rotate.Y_AXIS);
+               zRotateCam = new Rotate(0,Rotate.Z_AXIS); 
+               translateCam = new Translate(600,-300,-1000);
+               
+        cameraGroup.getTransforms().addAll(xRotateCam, yRotateCam, zRotateCam, translateCam);
+                
+                /*xRotateHero = new Rotate(0,0,0,0,Rotate.X_AXIS);
+                yRotateHero = new Rotate(0,0,0,0,Rotate.Y_AXIS);
+                
+        player3D.getTransforms().addAll(xRotateHero, yRotateHero);*/
+               
+        }
+    
+    public void checkRotationAngles(){ 
+        
+        if (angleWorldX.get() > MAXROTATIONANGLEX){ //X-axis rotationangles shouldn't flip over -5 and 90 grades 
                     angleWorldX.set(MAXROTATIONANGLEX);
         } 
                 
         if (angleWorldX.get() < MINROTATIONANGLEX){
                     angleWorldX.set(MINROTATIONANGLEX);
         } 
+        
+        if (angleWorldY.get() > MAXROTATIONANGLEY){ //Y-axis restricted to rotationangles 0-360 grade
+                    //angleWorldY.set(MINROTATIONANGLEY);
+        } 
+                
+        if (angleWorldY.get() < MINROTATIONANGLEY){
+                    //angleWorldY.set(MAXROTATIONANGLEY);
+        }
+        
     }
        
         
@@ -493,8 +573,8 @@ public class ArvenarGameGUI{
         
         clearDialogUI();
         
-            if ((hero3d.getTranslateX() > pirate3d.getTranslateX()+50) && 
-                 (hero3d.getTranslateY() > pirate3d.getTranslateY()+50)){
+            if ((player3D.getTranslateX() > pirate3d.getTranslateX()+50) && 
+                 (player3D.getTranslateY() > pirate3d.getTranslateY()+50)){
                     
                 dialogHBox.setVisible(true); 
                 dialogText.setText(objects3d.playerPC+" was fucked up by "+objects3d.playerNPC+"\n");
@@ -504,7 +584,7 @@ public class ArvenarGameGUI{
     }
       
     public void show_GameGUI(){
-        gamestage.show();
+        gameRunStage.show();
     }
 
     public void addPirates() throws FileNotFoundException{ //Add pirates to the map
@@ -518,30 +598,29 @@ public class ArvenarGameGUI{
            pirateTooltipImageView = new ImageView(Arvenar3DObjects.pirateImg);
            pirateDialogImageView = new ImageView(Arvenar3DObjects.pirateImg);
           
-           rx = random.nextInt(1500);
-           ry = random.nextInt(10);
+           rx = random.nextInt(600)-600;
+           ry = -125;
            rz = random.nextInt(1000)+100;
                     
            pirate3d.setTranslateX(rx); 
-           pirate3d.setTranslateY(-50); 
+           pirate3d.setTranslateY(ry); 
            pirate3d.setTranslateZ(rz);
-           actors.getChildren().add(pirate3d);
+           group3DWorld.getChildren().add(pirate3d);
         
         //}
     }   
        
     public void addHero() throws FileNotFoundException{
                 
-                heroImage = Arvenar3DObjects.heroImg;                
-                heroTooltipImageView = new ImageView(heroImage);
-                hero3d = objects3d.object3DHero();
+                player3D = objects3d.object3DHero();
                 heroNameLabel.setText(objects3d.playerPC);
+                //NOT USED: heroImage = Arvenar3DObjects.heroImg;                
+                heroTooltipImageView = new ImageView(Arvenar3DObjects.heroImg);
+               
+                player3D.getTransforms().addAll(new Translate(0,-200,-1000));
                 
-                hero3d.translateXProperty().set(ArvenarFXMain.guiResolutionX/2);
-                hero3d.translateYProperty().set(ArvenarFXMain.guiResolutionY-200);
-                hero3d.translateZProperty().set(500);
-                heroGroup.getChildren().add(hero3d);
-                          
+                group3DWorld.getChildren().add(player3D);
+                             
                 
                 infoText.setText("Hero "+objects3d.playerPC+" is playing on current map: "+dbaseMAPS.get_Random_Map().getMap_name()); //for selected map
                 
@@ -549,14 +628,38 @@ public class ArvenarGameGUI{
        
        
     public void createWorld() throws FileNotFoundException{
+              
+        skybox3d.buildSkyBox(group3DWorld);
+        obstacles3d.buildWalls(group3DWorld);
+        obstacles3d.buildMesh(group3DWorld);
+        obstacles3d.buildBush(group3DWorld);
+        //terrains3d.buildMeshTerrain(group3DWorld, -500, 0, 1000, 300, 500, "grass.jpg");
         
-        controlGroup.getChildren().addAll(controlsPane);
-        world3d = objects3d.object3DWorld();
-        actors.getChildren().add(world3d);
+        group3DWorld.getTransforms().addAll(new Translate(ArvenarFXMain.guiResolutionX/2, ArvenarFXMain.guiResolutionY-100, 5000));
         
         addHero();
         addPirates();
                 
+    }
+    
+    
+    void printOutInfo(){
+            System.out.println("playerCamera Z: "+translateCam.getZ());
+            System.out.println("playerCamera X: "+translateCam.getX());
+            
+            System.out.println("xRotateCam: "+angleWorldX.get());
+            System.out.println("yRotateCam: "+angleWorldY.get());
+            
+            System.out.println("xRotateCam pivotX: "+xRotateCam.getPivotX());
+            System.out.println("xRotateCam pivotZ: "+xRotateCam.getPivotZ());
+            System.out.println("yRotateCam pivotX: "+yRotateCam.getPivotX());
+            System.out.println("yRotateCam pivotZ: "+yRotateCam.getPivotZ());
+    }
+    
+    public void createControlGUI(){
+        
+        uiControlGroup.getChildren().addAll(controlsPane);
+                        
     }
     
     public void clearDialogUI(){
@@ -569,17 +672,17 @@ public class ArvenarGameGUI{
        
        public void clearGameUI(){
         
-            actors.getChildren().clear();
-            heroGroup.getChildren().clear();
-            controlGroup.getChildren().clear();
-            gameMainPane.getChildren().removeAll(controlsPane, worldSubScene, controlGroup, infoText, heroGroup);
+            group3DWorld.getChildren().clear();
+            
+            uiControlGroup.getChildren().clear();
+            game2DUILayoutPane.getChildren().removeAll(controlsPane, subScene3DWorld, world3DPane, uiControlGroup, infoText);
                        
        }
    
        public void resetGameUI() throws FileNotFoundException{
        
-           gameMainPane.getChildren().addAll(controlsPane, worldSubScene, controlGroup, infoText, heroGroup); //...hogy mindig legfelülre kerüljön a controlPanelVBox layer
-           //weather.createAnimation(gameMainPane, 0, 0, 1920, 1080, (int)Math.round(Math.random()*2));
+           game2DUILayoutPane.getChildren().addAll(controlsPane, subScene3DWorld, world3DPane, uiControlGroup, infoText); //...hogy mindig legfelülre kerüljön a controlPanelVBox layer
+           //weather.createAnimation(game2DUILayoutPane, 0, 0, 1920, 1080, (int)Math.round(Math.random()*2));
        }
        
        public Scene game_Scene(){
@@ -589,14 +692,14 @@ public class ArvenarGameGUI{
       
     public void showPauseMenuPopupPane(){
         
-        if (!gameMainPane.getChildren().contains(popupPane)){ 
-            popupPane.setLayoutX((gameMainPane.getWidth()/2)-300);
-            popupPane.setLayoutY((gameMainPane.getHeight()/2)-250);
-            gameMainPane.getChildren().add(popupPane);
+        if (!game2DUILayoutPane.getChildren().contains(popupPane)){ 
+            popupPane.setLayoutX((game2DUILayoutPane.getWidth()/2)-300);
+            popupPane.setLayoutY((game2DUILayoutPane.getHeight()/2)-250);
+            game2DUILayoutPane.getChildren().add(popupPane);
             controlsPane.setDisable(true);
         }
-        else if (gameMainPane.getChildren().contains(popupPane)){
-            gameMainPane.getChildren().remove(popupPane);
+        else if (game2DUILayoutPane.getChildren().contains(popupPane)){
+            game2DUILayoutPane.getChildren().remove(popupPane);
             controlsPane.setDisable(false);
         } 
     }

@@ -48,7 +48,7 @@ public class ArvenarFXMain extends Application {
         static Stage stageElven;
         public static int flagFullScreen;
         static Scene sceneElven;
-        
+                
         static ArvenarEffects arvfx = new ArvenarEffects();
         ArvenarFonts arvfonts;
         
@@ -59,6 +59,8 @@ public class ArvenarFXMain extends Application {
                         
         static Text mTxtStartGame, mTxtSettings, mTxtExtras, mTxtCredits, mTxtExit, versionText;
         static double g, h;
+        String buildVerText = "Arvenar - 3D Version - Build. 05032021";
+
                 
         static Pane paneElven;
         static Timer delayer;
@@ -77,7 +79,7 @@ public class ArvenarFXMain extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("ArvenarFx.fxml"));
 
 
-        readSettingsBR = new BufferedReader(new FileReader("c:\\Users\\djver\\OneDrive\\Dokumentumok\\NetBeansProjects\\Arvenar\\src\\settings.txt"));
+        readSettingsBR = new BufferedReader(new FileReader("src\\settings.txt"));
       
         credits = new ArvenarCredits();
         weather = new Weather();
@@ -96,19 +98,14 @@ public class ArvenarFXMain extends Application {
         stageElven = new Stage();
         stageElven.setTitle("Arvenar - Elven Tales - 2020 - by Gabor Veres"+" - Width: "+guiResolutionX+" Height: "+guiResolutionY+" FullScreen: "+flagFullScreen);
         
-        
-        
         sceneElven = new Scene(paneElven, guiResolutionX, guiResolutionY);
                 
         stageElven.setResizable(false);
                        
         stageElven.setScene(sceneElven);
         
-        
-        
         stageElven.setHeight(guiResolutionY); stageElven.setWidth(guiResolutionX);
-        
-        
+                
         stageElven.setFullScreen(flagFullScreen == 1 ? true : false);        
         stageElven.show();
         
@@ -118,8 +115,7 @@ public class ArvenarFXMain extends Application {
         //createWeather(10);
         
         weather.createAnimation(paneElven, 0, 0, 1920, 1080,1);
-        
-        
+                
         createGUIElements();
                 
         //--------------------------------------------------------
@@ -252,7 +248,7 @@ public class ArvenarFXMain extends Application {
         mTxtExtras = arvfonts.newTextFormat("Extras", mTxtExtras, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
         mTxtCredits = arvfonts.newTextFormat("Credits", mTxtCredits, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
         mTxtExit = arvfonts.newTextFormat("Exit game", mTxtExit, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
-        versionText = arvfonts.newTextFormat("Arvenar GUI version - Build 01.12.20", versionText, null, arvfx.reflectionEffect, Font.font("Verdana", FontWeight.BOLD, 18), Color.CORAL, (int)mTxtVBox.getLayoutX(), guiResolutionY-200);
+        versionText = arvfonts.newTextFormat(buildVerText, versionText, null, arvfx.reflectionEffect, Font.font("Verdana", FontWeight.BOLD, 18), Color.CORAL, (int)mTxtVBox.getLayoutX(), guiResolutionY-200);
         exitGameHeaderText = arvfonts.newTextFormat("Exit game?", exitGameHeaderText, null, arvfx.shadowEffect, Font.font("Verdana", FontWeight.BOLD, 28), Color.DARKORANGE, 0, 0);
         exitGameYesText = arvfonts.newTextFormat("Yes", exitGameYesText, null, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.CORAL, 0, 0);
         exitGameNoText = arvfonts.newTextFormat("No", exitGameNoText, null, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.AQUA, 0, 0);
@@ -277,8 +273,7 @@ public class ArvenarFXMain extends Application {
         
         arvfx.btnTextEffects(exitGameYesText);
         arvfx.btnTextEffects(exitGameNoText);
-        
-        
+                
     }
     
     public static void main(String[] args) throws FileNotFoundException {
