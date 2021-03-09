@@ -125,6 +125,19 @@ public Box object3DTerrain(int width, int height, int depth, int xPos, int yPos,
     return terrainName;
 }
 
+public Box object3DWall(int width, int height, int depth, int xPos, int yPos, int zPos, String diffuseMap, String bumpMap) throws FileNotFoundException{
+    
+    Box wallName = new Box(width, height, depth);
+    wallName.getTransforms().addAll(new Translate(xPos, yPos, zPos));
+        
+    PhongMaterial wallPaper = new PhongMaterial();
+    wallPaper.setDiffuseMap(new Image(new FileInputStream(imagesDirectory+diffuseMap)));
+    wallPaper.setBumpMap(new Image(new FileInputStream(imagesDirectory+bumpMap)));
+    //wallpaper.setSpecularColor(color);
+    wallName.setMaterial(wallPaper);
+        
+    return wallName;
+}
 
 public MeshView object3DMesh(float top, float height, float width, int xPos, int zPos, String diffuseMap) throws FileNotFoundException{
     

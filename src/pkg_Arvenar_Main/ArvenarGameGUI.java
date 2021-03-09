@@ -5,6 +5,7 @@
  */
 package pkg_Arvenar_Main;
 import java.io.FileNotFoundException;
+import static java.lang.Math.abs;
 import java.util.Random;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
