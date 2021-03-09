@@ -633,6 +633,8 @@ public class ArvenarGameGUI{
         obstacles3d.buildWalls(group3DWorld);
         obstacles3d.buildMesh(group3DWorld);
         obstacles3d.buildBush(group3DWorld);
+        
+        group3DWorld.getChildren().add(objects3d.object3DWall(500, 1000, 300, 500, -500, 600, "brickwall.jpg"));
         //terrains3d.buildMeshTerrain(group3DWorld, -500, 0, 1000, 300, 500, "grass.jpg");
         
         group3DWorld.getTransforms().addAll(new Translate(ArvenarFXMain.guiResolutionX/2, ArvenarFXMain.guiResolutionY-100, 5000));
