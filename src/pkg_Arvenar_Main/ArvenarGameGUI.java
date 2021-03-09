@@ -5,7 +5,6 @@
  */
 package pkg_Arvenar_Main;
 import java.io.FileNotFoundException;
-import static java.lang.Math.abs;
 import java.util.Random;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -50,6 +49,7 @@ import pkg_Maps.Map_DataBase;
  */
 public class ArvenarGameGUI{
        
+    DisplayManager displayManager = new DisplayManager();
     Stage gameRunStage = new Stage();
     Pane game2DUILayoutPane = new Pane();
     Pane world3DPane = new Pane();
@@ -110,10 +110,11 @@ public class ArvenarGameGUI{
     private double anchorX, anchorY;
     private double anchorAngleX = 0;
     private double anchorAngleY = 0;
+    private double yR;
     
     //min - max rotation angles (x,y)
-    private final double MAXROTATIONANGLEX = 90; //does not flip over
-    private final double MINROTATIONANGLEX = -90; //does not flip over
+    private final double MAXROTATIONANGLEX = 60; //does not flip over
+    private final double MINROTATIONANGLEX = -20; //does not flip over
     private final double MAXROTATIONANGLEY = 360; 
     private final double MINROTATIONANGLEY = 1; 
     
@@ -148,7 +149,7 @@ public class ArvenarGameGUI{
          
         
     Rotate xRotateCam, yRotateCam, zRotateCam, xRotateWorld, yRotateWorld, zRotateWorld, xRotateHero, yRotateHero;
-    Translate translateCam, translateWorld;
+    Translate translateCam, translateWorld, translatePlayer;
                     
     public ArvenarGameGUI() throws FileNotFoundException, InterruptedException{ //ez nem lehet void, különben üres stage-t kapsz vissza!!
         
@@ -156,12 +157,11 @@ public class ArvenarGameGUI{
         objects3d = new Arvenar3DObjects();
         transform3d = new Arvenar3DTransforms();
                       
-        subScene3DWorld = new SubScene(group3DWorld, 1920, 1080, true, SceneAntialiasing.BALANCED);
+        subScene3DWorld = new SubScene(group3DWorld, displayManager.getResolutionX(), displayManager.getResolutionY(), true, SceneAntialiasing.BALANCED);
         group3DWorld.getChildren().add(world3DPane);
         weather.createAnimation(world3DPane, 0, 0, 1920, 1080,2);
                 
-        playableScreenXSize = ArvenarFXMain.guiResolutionX-100; playableScreenYSize = ArvenarFXMain.guiResolutionY-100;
-        
+                
         SCREEN_MAX_X = 1200; 
         SCREEN_MAX_Y = 738;
         SCREEN_MIN_X = 30; 
@@ -172,6 +172,7 @@ public class ArvenarGameGUI{
        initPerspectiveCamera();
        initCameraTransforms();
        initWorldTransforms();
+       initPlayerTransforms();
        createBindings();
         
         //------------------------------------------------------
@@ -188,7 +189,7 @@ public class ArvenarGameGUI{
         compass3d = objects3d.object3DCompass();
         compass3d.setLayoutX(110); compass3d.setLayoutY(240);
                               
-        infoText = arvfx.setTextEffect(infoText, arvfx.glowEffect, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.GOLD, ArvenarFXMain.guiResolutionX/2, 50);
+        infoText = arvfx.setTextEffect(infoText, arvfx.glowEffect, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.GOLD, displayManager.getResolutionX()/2, 50);
         dialogText = arvfx.setTextEffect(dialogText, null, null, Font.font("Verdana", FontWeight.BOLD, 18), Color.BEIGE, 0, 10);
         
         heroNameLabel = arvfx.setTextEffect(heroNameLabel, null, null, Font.font("Verdana", FontWeight.BOLD, 14), Color.HONEYDEW, 0, 0);
@@ -209,12 +210,12 @@ public class ArvenarGameGUI{
         dialogHBox.setStyle("-fx-background-color: rgba(128, 64, 128, 0.4); -fx-background-radius: 5; -fx-spacing: 10; -fx-padding: 10"); //transparent and rounded dialog box
         dialogHBox.setVisible(false);
         dialogHBox.getChildren().add(dialogText); 
-        dialogHBox.setLayoutX((ArvenarFXMain.guiResolutionX/2)-(dialogHBox.getPrefWidth()/2)); dialogHBox.setLayoutY(ArvenarFXMain.guiResolutionY-200);
+        dialogHBox.setLayoutX((displayManager.getResolutionX()/2)-(dialogHBox.getPrefWidth()/2)); dialogHBox.setLayoutY(displayManager.getResolutionY()-200);
         
                 
         //SUBPANE for controls, compass and buttons
-        controlsPane.setStyle("-fx-background-color: rgba(0, 50, 50, 0.6); -fx-background-radius: 5; -fx-padding: 10"); 
-        controlsPane.setLayoutX(50); controlsPane.setLayoutY(50);
+        controlsPane.setStyle("-fx-background-color: rgba(0, 50, 50, 0.6); -fx-background-radius: 8; -fx-padding: 10"); 
+        controlsPane.setLayoutX(50); controlsPane.setLayoutY(300);
         controlsPane.getChildren().addAll(btnPlayGame, btnPlayRandomly, btnExitGame, moveUpButton, moveDownButton, moveLeftButton, moveRightButton, compass3d);
                 
         escPopUpVBox.setMaxSize(500, 300); escPopUpVBox.setMinSize(500, 300);
@@ -254,19 +255,18 @@ public class ArvenarGameGUI{
                 if(kevent.isControlDown()) //crouch
                     {currentSpeed = DEFAULTMOVEMENTSPEED / speedModifier;}
                                           
-            switch  (kevent.getCode()){
+            switch (kevent.getCode()){
                                                 
                 case W:  
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, -1, Rotate.X_AXIS);
-                translateWorld.setZ(translateWorld.getZ()-currentSpeed);
-                             
+                transform3d.move3DNodeZ(group3DWorld,translateWorld.getX()+Math.abs(angleWorldY.get()), translateWorld.getZ()-currentSpeed);
+                
                 break;
 
                 case S: 
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, 1, Rotate.X_AXIS);
-                
                 translateWorld.setZ(translateWorld.getZ()+currentSpeed);
                 
                                 
@@ -309,11 +309,11 @@ public class ArvenarGameGUI{
                 break;
                 
                 case Q: 
-                        playerCamera.translateYProperty().set(playerCamera.getTranslateY()-50);
+                        cameraGroup.translateYProperty().set(cameraGroup.getTranslateY()-50);
                 break;
                 
                 case E: 
-                        playerCamera.translateYProperty().set(playerCamera.getTranslateY()+50);
+                        cameraGroup.translateYProperty().set(cameraGroup.getTranslateY()+50);
                 break;
                 
                 
@@ -378,6 +378,7 @@ public class ArvenarGameGUI{
                 
                 angleWorldX.set(anchorAngleX - (mevent.getSceneY() - anchorY)*invertedMouse);
                 angleWorldY.set(anchorAngleY + (mevent.getSceneX() - anchorX)*invertedMouse);
+                yR = 360-angleWorldY.get();
                 
                 checkRotationAngles();
                                 
@@ -389,8 +390,7 @@ public class ArvenarGameGUI{
             gameMainScene.setOnScroll((ScrollEvent event) ->{
                 double deltaY = event.getDeltaY();
                 playerCamera.setTranslateY(playerCamera.getTranslateY()+deltaY);
-                
-                
+                                
             });
         
 //select nodes - only for the tests
@@ -451,14 +451,11 @@ public class ArvenarGameGUI{
         
                
         btnPlayGame.setOnAction(action -> {
-            
-            
-            
+          
         });
               
         btnPlayRandomly.setOnAction(action ->{
-                     
-         
+           
         });        
        
     }
@@ -481,23 +478,17 @@ public class ArvenarGameGUI{
         
         xRotateWorld.angleProperty().bind(angleWorldX);
         yRotateWorld.angleProperty().bind(angleWorldY);
-                
-        //yRotateCam.pivotZProperty().bind(translateCam.zProperty());
-        //yRotateCam.pivotXProperty().bind(translateCam.xProperty());
         
         xRotateHero.angleProperty().bind(angleHeroX);
         yRotateHero.angleProperty().bind(angleHeroY);
-        
-                
         
     }
     
     public void initPerspectiveCamera(){
         playerCamera.setNearClip(0.1); // ha setNearClip(1.0), akkor üres kezdőháttered lesz!!
-        playerCamera.setFarClip(100000);
+        playerCamera.setFarClip(150000);
         playerCamera.setFieldOfView(40);
-        playerCamera.getTransforms().addAll(new Translate(0,0,0));
-        
+                
         cameraGroup.getChildren().addAll(playerCamera);
         //group3DWorld.getChildren().addAll(cameraGroup);
         subScene3DWorld.setCamera(playerCamera);
@@ -523,13 +514,7 @@ public class ArvenarGameGUI{
                translateWorld = new Translate(0,0,0);
                
         group3DWorld.getTransforms().addAll(xRotateWorld, yRotateWorld, zRotateWorld, translateWorld);
-                
-                xRotateHero = new Rotate(0,0,0,0,Rotate.X_AXIS);
-                yRotateHero = new Rotate(0,0,0,0,Rotate.Y_AXIS);
-                
-        player3D.getTransforms().addAll(xRotateHero, yRotateHero);
-               
-               
+             
         }
     
     
@@ -538,16 +523,20 @@ public class ArvenarGameGUI{
                xRotateCam = new Rotate(0,Rotate.X_AXIS);
                yRotateCam = new Rotate(0,Rotate.Y_AXIS);
                zRotateCam = new Rotate(0,Rotate.Z_AXIS); 
-               translateCam = new Translate(600,-300,-1000);
+               translateCam = new Translate(displayManager.getResolutionX()/2,0,displayManager.getResolutionY());
                
         cameraGroup.getTransforms().addAll(xRotateCam, yRotateCam, zRotateCam, translateCam);
                 
-                /*xRotateHero = new Rotate(0,0,0,0,Rotate.X_AXIS);
-                yRotateHero = new Rotate(0,0,0,0,Rotate.Y_AXIS);
+    }
+    
+    public void initPlayerTransforms(){
+        
+        xRotateHero = new Rotate(0,0,0,0,Rotate.X_AXIS);
+        yRotateHero = new Rotate(0,0,0,0,Rotate.Y_AXIS);
+        translatePlayer = new Translate(0,-200,0);
                 
-        player3D.getTransforms().addAll(xRotateHero, yRotateHero);*/
-               
-        }
+        player3D.getTransforms().addAll(xRotateHero, yRotateHero, translatePlayer);
+    }
     
     public void checkRotationAngles(){ 
         
@@ -618,8 +607,6 @@ public class ArvenarGameGUI{
                 //NOT USED: heroImage = Arvenar3DObjects.heroImg;                
                 heroTooltipImageView = new ImageView(Arvenar3DObjects.heroImg);
                
-                player3D.getTransforms().addAll(new Translate(0,-200,-1000));
-                
                 group3DWorld.getChildren().add(player3D);
                              
                 
@@ -635,10 +622,10 @@ public class ArvenarGameGUI{
         obstacles3d.buildMesh(group3DWorld);
         obstacles3d.buildBush(group3DWorld);
         
-        group3DWorld.getChildren().add(objects3d.object3DWall(500, 1000, 300, 500, -500, 600, "brickwall.jpg"));
+        group3DWorld.getChildren().add(objects3d.object3DWall(500, 2000, 300, 500, -1000, 600, "brickwall.jpg"));
         //terrains3d.buildMeshTerrain(group3DWorld, -500, 0, 1000, 300, 500, "grass.jpg");
         
-        group3DWorld.getTransforms().addAll(new Translate(ArvenarFXMain.guiResolutionX/2, ArvenarFXMain.guiResolutionY-100, 5000));
+        group3DWorld.getTransforms().addAll(new Translate(displayManager.getResolutionX()/2, displayManager.getResolutionY()-100, 5000));
         
         addHero();
         addPirates();
@@ -647,16 +634,16 @@ public class ArvenarGameGUI{
     
     
     void printOutInfo(){
-            System.out.println("playerCamera Z: "+translateCam.getZ());
-            System.out.println("playerCamera X: "+translateCam.getX());
+            System.out.println("World Z: "+translateWorld.getZ());
+            System.out.println("world X: "+translateWorld.getX());
             
-            System.out.println("xRotateCam: "+angleWorldX.get());
-            System.out.println("yRotateCam: "+angleWorldY.get());
+            System.out.println("angleWorldX: "+angleWorldX.get());
+            System.out.println("angleWorldY: "+angleWorldY.get());
             
-            System.out.println("xRotateCam pivotX: "+xRotateCam.getPivotX());
-            System.out.println("xRotateCam pivotZ: "+xRotateCam.getPivotZ());
-            System.out.println("yRotateCam pivotX: "+yRotateCam.getPivotX());
-            System.out.println("yRotateCam pivotZ: "+yRotateCam.getPivotZ());
+           // System.out.println("xRotateCam pivotX: "+xRotateCam.getPivotX());
+            //System.out.println("xRotateCam pivotZ: "+xRotateCam.getPivotZ());
+            //System.out.println("yRotateCam pivotX: "+yRotateCam.getPivotX());
+           // System.out.println("yRotateCam pivotZ: "+yRotateCam.getPivotZ());
     }
     
     public void createControlGUI(){

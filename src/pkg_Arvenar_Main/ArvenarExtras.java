@@ -45,10 +45,11 @@ public class ArvenarExtras {
     Arvenar_View_Maps view_maps;
     ArvenarSetPC view_pc;
     MPlayer mp3player;
+    DisplayManager displayManager;
                           
     
-    int stageSizeX = ArvenarFXMain.guiResolutionX;
-    int stageSizeY = ArvenarFXMain.guiResolutionY;
+    int stageSizeX = displayManager.getResolutionX();
+    int stageSizeY = displayManager.getResolutionY();
     
     
     public ArvenarExtras()throws Exception{

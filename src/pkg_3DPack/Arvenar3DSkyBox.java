@@ -41,12 +41,12 @@ public class Arvenar3DSkyBox {
     
     public void buildSkyBox(Group group){
         
-        arrangeImageViews(iwTop, -25000, -37500, 0, 50000, 50000, 90, Rotate.X_AXIS);
-        arrangeImageViews(iwBottom, -25000, -25000, 0, 50000, 50000, 90, Rotate.X_AXIS);
-        arrangeImageViews(iwFront, -25000, -12500, -25000, 50000, 25000, 0, Rotate.Y_AXIS);
-        arrangeImageViews(iwBack, -25000, -12500, 25000, 50000, 25000, 0, Rotate.Y_AXIS);
-        arrangeImageViews(iwLeft, -50000, -12500, 0, 50000, 25000, 90, Rotate.Y_AXIS);
-        arrangeImageViews(iwRight, 0, -12500, 0, 50000, 25000, 90, Rotate.Y_AXIS);
+        arrangeImageViews(iwTop, -50000, -75000, 0, 100000, 100000, 90, Rotate.X_AXIS);
+        arrangeImageViews(iwBottom, -50000, -50000, 0, 100000, 100000, 90, Rotate.X_AXIS);
+        arrangeImageViews(iwFront, -50000, -25000, -50000, 100000, 50000, 0, Rotate.Y_AXIS);
+        arrangeImageViews(iwBack, -50000, -25000, 50000, 100000, 50000, 0, Rotate.Y_AXIS);
+        arrangeImageViews(iwLeft, -100000, -25000, 0, 100000, 50000, 90, Rotate.Y_AXIS);
+        arrangeImageViews(iwRight, 0, -25000, 0, 100000, 50000, 90, Rotate.Y_AXIS);
         
         group.getChildren().addAll(iwTop, iwLeft, iwFront, iwRight, iwBack, iwBottom);
     }

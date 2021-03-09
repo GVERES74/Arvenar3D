@@ -52,14 +52,14 @@ public class Arvenar3DTransforms {
     }
     
    
-    public void move3DNode(Node node, double xSpeed, double ySpeed, double zSpeed){
+    public void move3DNodeZ(Node node, double xCoords, double zSpeed){
         
-        Translate cameraTranslate = new Translate(xSpeed, ySpeed, zSpeed);
+        Translate translate = new Translate(xCoords, 0, zSpeed);
                         
            
-        node.getTransforms().addAll(cameraTranslate);
-        cameraTranslate.setZ(cameraTranslate.getZ()+zSpeed);
-        
+        node.getTransforms().addAll(translate);
+        translate.setZ(translate.getZ()+zSpeed);
+        translate.setX(translate.getX()+xCoords);
            
     }
 }

@@ -42,9 +42,9 @@ import javafx.scene.Node;
 public class ArvenarFXMain extends Application {
     
         Timer timer;
-        public static int guiResolutionX = 1366;
-        public static int guiResolutionY = 768;
         
+        DisplayManager displayManager = new DisplayManager(); 
+                      
         static Stage stageElven;
         public static int flagFullScreen;
         static Scene sceneElven;
@@ -78,7 +78,8 @@ public class ArvenarFXMain extends Application {
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("ArvenarFx.fxml"));
 
-
+        
+        
         readSettingsBR = new BufferedReader(new FileReader("src\\settings.txt"));
       
         credits = new ArvenarCredits();
@@ -96,15 +97,15 @@ public class ArvenarFXMain extends Application {
         
         
         stageElven = new Stage();
-        stageElven.setTitle("Arvenar - Elven Tales - 2020 - by Gabor Veres"+" - Width: "+guiResolutionX+" Height: "+guiResolutionY+" FullScreen: "+flagFullScreen);
+        stageElven.setTitle("Arvenar - Elven Tales - 2020 - by Gabor Veres"+" - Width: "+displayManager.resolutionX+" Height: "+displayManager.resolutionY+" FullScreen: "+flagFullScreen);
         
-        sceneElven = new Scene(paneElven, guiResolutionX, guiResolutionY);
+        sceneElven = new Scene(paneElven, displayManager.getResolutionX(), displayManager.getResolutionY());
                 
         stageElven.setResizable(false);
                        
         stageElven.setScene(sceneElven);
         
-        stageElven.setHeight(guiResolutionY); stageElven.setWidth(guiResolutionX);
+        stageElven.setHeight(displayManager.getResolutionY()); stageElven.setWidth(displayManager.getResolutionX());
                 
         stageElven.setFullScreen(flagFullScreen == 1 ? true : false);        
         stageElven.show();
@@ -203,8 +204,8 @@ public class ArvenarFXMain extends Application {
     public void showExitMenuPopupPane(){
         
         if (!paneElven.getChildren().contains(exitGameVBox)){ 
-            exitGameVBox.setLayoutX((guiResolutionX/2)-150);
-            exitGameVBox.setLayoutY((guiResolutionY/2)-150);
+            exitGameVBox.setLayoutX((displayManager.getResolutionX()/2)-150);
+            exitGameVBox.setLayoutY((displayManager.getResolutionY()/2)-150);
             paneElven.getChildren().add(exitGameVBox);
             mTxtVBox.setDisable(true);
         }
@@ -248,7 +249,7 @@ public class ArvenarFXMain extends Application {
         mTxtExtras = arvfonts.newTextFormat("Extras", mTxtExtras, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
         mTxtCredits = arvfonts.newTextFormat("Credits", mTxtCredits, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
         mTxtExit = arvfonts.newTextFormat("Exit game", mTxtExit, arvfx.setGlowEffect(0.0), null, Font.font("Verdana", FontWeight.BOLD, 24), Color.CORAL, 0, 0);
-        versionText = arvfonts.newTextFormat(buildVerText, versionText, null, arvfx.reflectionEffect, Font.font("Verdana", FontWeight.BOLD, 18), Color.CORAL, (int)mTxtVBox.getLayoutX(), guiResolutionY-200);
+        versionText = arvfonts.newTextFormat(buildVerText, versionText, null, arvfx.reflectionEffect, Font.font("Verdana", FontWeight.BOLD, 18), Color.CORAL, (int)mTxtVBox.getLayoutX(), displayManager.getResolutionY()-200);
         exitGameHeaderText = arvfonts.newTextFormat("Exit game?", exitGameHeaderText, null, arvfx.shadowEffect, Font.font("Verdana", FontWeight.BOLD, 28), Color.DARKORANGE, 0, 0);
         exitGameYesText = arvfonts.newTextFormat("Yes", exitGameYesText, null, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.CORAL, 0, 0);
         exitGameNoText = arvfonts.newTextFormat("No", exitGameNoText, null, null, Font.font("Verdana", FontWeight.BOLD, 20), Color.AQUA, 0, 0);

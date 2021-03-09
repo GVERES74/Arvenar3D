@@ -77,10 +77,8 @@ public class ArvenarSettings {
     ArvenarEffects arvfx = new ArvenarEffects();
     ArvenarFonts arvfonts;
     ArvenarButtons arv_buttons = new ArvenarButtons();
-    
-    int stageSizeX = ArvenarFXMain.guiResolutionX;
-    int stageSizeY = ArvenarFXMain.guiResolutionY;
-    
+    DisplayManager displayManager = new DisplayManager();
+        
     BufferedWriter settingsBW;
     
     public ArvenarSettings()throws Exception{
@@ -149,10 +147,9 @@ public class ArvenarSettings {
         cbFullScreen.setLayoutX(170); cbFullScreen.setLayoutY(38); cbFullScreen.setSelected(false);
         cbResolution.setLayoutX(170); cbResolution.setLayoutY(70);
         cbResolution.getItems().add("1366x768"); cbResolution.getItems().add("1920x1080"); cbResolution.setValue("1366x768");
-        sceneText = arvfx.setTextEffect(sceneText, arvfx.setGlowEffect(0.5), null, Font.font("Verdana", FontWeight.BOLD, 36), Color.SILVER, 50, stageSizeY-200);
+        sceneText = arvfx.setTextEffect(sceneText, arvfx.setGlowEffect(0.5), null, Font.font("Verdana", FontWeight.BOLD, 36), Color.SILVER, 50, displayManager.getResolutionY()-200);
         video_pane.getChildren().addAll(videoGroupText, label_is_Fullscreen, cbFullScreen, labelResolution, cbResolution);
-        System.out.println(stageSizeX+" / "+stageSizeY);
-        
+                
         //----------- Mouse and Keyboard control box----------------------------------------------
         controlsPane.setMaxSize(350, 110); controlsPane.setMinSize(350, 110);
         controlsPane.setStyle("-fx-background-color: rgba(0, 50, 50, 0.2); -fx-background-radius: 5;");
@@ -162,7 +159,7 @@ public class ArvenarSettings {
         lbInvertKeyBoard.setLayoutX(10); lbInvertKeyBoard.setLayoutY(60);
         lbInvertKeyBoard.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
         cbInvertMouse.setLayoutX(150); cbInvertMouse.setLayoutY(40);
-        cbInvertKeyBoard.setLayoutX(150); cbInvertKeyBoard.setLayoutY(60);
+        cbInvertKeyBoard.setLayoutX(150); cbInvertKeyBoard.setLayoutY(65);
         cbInvertMouse.setSelected(false);
         cbInvertKeyBoard.setSelected(false);
         
@@ -280,14 +277,13 @@ public class ArvenarSettings {
                 try {
                     //settings_stage.close();
                     switch ((String) cbResolution.getValue()){
-                            case "1366x768": ArvenarFXMain.stageElven.setWidth(1366); 
-                                             ArvenarFXMain.stageElven.setHeight(768); 
+                            case "1366x768": displayManager.setResolution(1366, 768); 
                                              break;
-                            case "1920x1080": ArvenarFXMain.stageElven.setWidth(1920); 
-                                              ArvenarFXMain.stageElven.setHeight(1080); 
+                            case "1920x1080": displayManager.setResolution(1920, 1080); 
                                               break;
+                                              
                     }
-                                        
+                       System.out.println(displayManager.getResolutionX()+"/"+displayManager.getResolutionY());                 
                     
                     if (cbFullScreen.isSelected()){
                         ArvenarFXMain.flagFullScreen = 1;
@@ -377,8 +373,8 @@ public class ArvenarSettings {
         
             settingsBW = new BufferedWriter(new FileWriter("c:\\Users\\te332168\\Documents\\NetBeansProjects\\Arvenar\\src\\settings.txt"));
             
-            settingsBW.write("ResX = "+ArvenarFXMain.guiResolutionX);
-            settingsBW.write("ResY = "+ArvenarFXMain.guiResolutionY);
+            settingsBW.write("ResX = "+displayManager.getResolutionX());
+            settingsBW.write("ResY = "+displayManager.getResolutionY());
             settingsBW.write("FullScreen = "+ArvenarFXMain.flagFullScreen);
             
             settingsBW.flush();

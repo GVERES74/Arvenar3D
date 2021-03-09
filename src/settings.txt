@@ -1,1 +1,1 @@
-ResX = 1366ResY = 768FullScreen = 0
+ResX = 1920ResY = 1080FullScreen = 0
