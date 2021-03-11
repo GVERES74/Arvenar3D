@@ -114,7 +114,7 @@ public class ArvenarGameGUI{
     private double anchorX, anchorY;
     private double anchorAngleX = 0;
     private double anchorAngleY = 0;
-    private double yzR, yxR;
+    private double moveZDirection, moveXDirection;
     
     //min - max rotation angles (x,y)
     private final double MAXROTATIONANGLEX = 60; //does not flip over
@@ -249,10 +249,7 @@ public class ArvenarGameGUI{
 //Keyboard events
     //*i have tryed to implement here also the mouse control rotation logic, so that we can use here the same code now
         gameMainScene.setOnKeyPressed((KeyEvent kevent)->{ 
-        
-              
-            yzR = -Math.sin(angleWorldY.get())*10;
-            yxR = Math.cos(angleWorldY.get())*10;
+         
             
             showConsoleInfo();         
             
@@ -262,20 +259,27 @@ public class ArvenarGameGUI{
                     {currentSpeed = DEFAULTMOVEMENTSPEED * speedModifier;}
                 if(kevent.isControlDown()) //crouch
                     {currentSpeed = DEFAULTMOVEMENTSPEED / speedModifier;}
-                                          
+                
+//                moveXDirection = currentSpeed * Math.cos(Math.toRadians(angleWorldY.get()));
+//                moveZDirection = currentSpeed * Math.sin(Math.toRadians(angleWorldY.get()));
+                moveZDirection = currentSpeed * Math.sin(Math.PI / 180 * angleWorldY.get());
+                moveXDirection = currentSpeed * Math.cos(Math.PI / 180 * angleWorldY.get());
+                
+                
             switch (kevent.getCode()){
                                                 
                 case W:  
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, -1, Rotate.X_AXIS);
-                translateWorld.setZ(translateWorld.getZ()+yzR);
-                translateWorld.setX(translateWorld.getX()+yxR);
+                translateWorld.setZ(translateWorld.getZ()-moveXDirection);
+                translateWorld.setX(translateWorld.getX()+moveZDirection);
                 break;
 
                 case S: 
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, 1, Rotate.X_AXIS);
-                translateWorld.setZ(translateWorld.getZ()+currentSpeed);
+                translateWorld.setZ(translateWorld.getZ()+moveXDirection);
+                translateWorld.setX(translateWorld.getX()-moveZDirection);
                 
                                 
                 break;
@@ -385,8 +389,10 @@ public class ArvenarGameGUI{
                 angleWorldX.set(anchorAngleX - (mevent.getSceneY() - anchorY)*invertedMouse);
                 angleWorldY.set(anchorAngleY + (mevent.getSceneX() - anchorX)*invertedMouse);
                 
-                yzR = -Math.sin(angleWorldY.get())*10;
-                yxR = Math.sin(angleWorldY.get())*10;
+//                moveXDirection = 10 * Math.cos(Math.toRadians(angleWorldY.get()));
+//                moveZDirection = 10 * Math.sin(Math.toRadians(angleWorldY.get()));
+                moveZDirection = currentSpeed * Math.sin(Math.PI / 180 * angleWorldY.get());
+                moveXDirection = currentSpeed * Math.cos(Math.PI / 180 * angleWorldY.get());
                 
                  checkRotationAngles();
                  showConsoleInfo();
@@ -551,8 +557,8 @@ public class ArvenarGameGUI{
         
         angleWorldX.set(angleWorldX.get() > MAXROTATIONANGLEX ? MAXROTATIONANGLEX : angleWorldX.get());
         angleWorldX.set(angleWorldX.get() < MINROTATIONANGLEX ? MINROTATIONANGLEX : angleWorldX.get());
-        angleWorldY.set(angleWorldY.get() > MAXROTATIONANGLEY ? 1 : angleWorldY.get());
-        angleWorldY.set(angleWorldY.get() < MINROTATIONANGLEY ? 359 : angleWorldY.get());
+//        angleWorldY.set(angleWorldY.get() > MAXROTATIONANGLEY ? 1 : angleWorldY.get());
+//        angleWorldY.set(angleWorldY.get() < MINROTATIONANGLEY ? 359 : angleWorldY.get());
         
         /*if (angleWorldX.get() > MAXROTATIONANGLEX){ //X-axis rotationangles shouldn't flip over -5 and 90 grades 
                     angleWorldX.set(MAXROTATIONANGLEX);
@@ -675,8 +681,9 @@ public class ArvenarGameGUI{
                                     "World X-Axis: "+translateWorld.getX()+"\n"+
                                     "Pitch: "+angleWorldX.get()+"\n"+
                                     "Yaw: "+angleWorldY.get()+"\n"+
-                                    "rCosX: "+yxR+"\n"+
-                                    "rSinZ: "+yzR+"\n");    
+                                    "rCosX: "+moveXDirection+"\n"+
+                                    "rSinZ: "+moveZDirection+"\n"+
+                                    "Speed: "+currentSpeed);    
            
        }
        
