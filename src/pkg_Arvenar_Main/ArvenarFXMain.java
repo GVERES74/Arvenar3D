@@ -34,6 +34,7 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import javafx.scene.Node;
+import pkg_GUI.GuiDialogs;
 
 /**
  *
@@ -55,6 +56,7 @@ public class ArvenarFXMain extends Application {
         ArvenarCredits credits;
         ArvenarExtras extras;
         ArvenarGameMode gamemodegui;
+        GuiDialogs dialog = new GuiDialogs();
         
                         
         static Text mTxtStartGame, mTxtSettings, mTxtExtras, mTxtCredits, mTxtExit, versionText;
@@ -256,12 +258,7 @@ public class ArvenarFXMain extends Application {
                 
         mTxtVBox.getChildren().addAll(mTxtStartGame, mTxtSettings, mTxtExtras, mTxtCredits, mTxtExit);
         
-        exitGameVBox.setMaxHeight(300); exitGameVBox.setMaxWidth(450);
-        exitGameVBox.setMinHeight(300); exitGameVBox.setMinWidth(450);
-        exitGameVBox.setAlignment(Pos.CENTER);
-        exitGameVBox.setSpacing(20); 
-        exitGameVBox.setStyle("-fx-background-color: rgba(64, 50, 128, 0.2); -fx-background-radius: 5; -fx-padding: 30;"); //transparent and rounded VBox with padding
-        exitGameVBox.getChildren().addAll(exitGameHeaderText, exitGameYesText, exitGameNoText);
+        exitGameVBox.getChildren().addAll(dialog.showPopupWindow(exitGameHeaderText, exitGameYesText, exitGameNoText, new Text("")));
                      
         paneElven.setBackground(new Background(new BackgroundImage(bkgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT)));
         paneElven.getChildren().addAll(mTxtVBox, versionText); 

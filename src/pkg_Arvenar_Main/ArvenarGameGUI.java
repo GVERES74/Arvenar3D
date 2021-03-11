@@ -41,6 +41,7 @@ import javafx.stage.Stage;
 import pkg_3DPack.*;
 import pkg_Characters.Character_DataBase_NPC;
 import pkg_Characters.Character_DataBase_PC;
+import pkg_GUI.GuiDialogs;
 import pkg_Maps.Map_DataBase;
 
 /**
@@ -54,15 +55,17 @@ public class ArvenarGameGUI{
     Pane game2DUILayoutPane = new Pane();
     Pane world3DPane = new Pane();
         
-    VBox escPopUpVBox = new VBox();
+    GuiDialogs dialog = new GuiDialogs();
     
     Pane controlsPane = new Pane();
     Pane popupPane = new Pane();
+    VBox consoleInfoVBox = new VBox();
+    
     Scene gameMainScene = new Scene(game2DUILayoutPane);
     SubScene subScene3DWorld;
         
     Group group3DWorld = new Group();
-    Group uiControlGroup = new Group();
+    Group uiContentGroup = new Group();
     Group cameraGroup = new Group();
         
     HBox dialogHBox = new HBox();
@@ -74,6 +77,7 @@ public class ArvenarGameGUI{
     Text dialogText = new Text();
     Text infoText = new Text();
     Text escPopupHeadText, optReturnToGameText, optExitToMainMenuText, optSettingsText;
+    Text consoleInfoText = new Text("Console info");
     Text pirateNameLabel = new Text();
     Text heroNameLabel = new Text();
     
@@ -110,17 +114,17 @@ public class ArvenarGameGUI{
     private double anchorX, anchorY;
     private double anchorAngleX = 0;
     private double anchorAngleY = 0;
-    private double yR;
+    private double yzR, yxR;
     
     //min - max rotation angles (x,y)
     private final double MAXROTATIONANGLEX = 60; //does not flip over
     private final double MINROTATIONANGLEX = -20; //does not flip over
     private final double MAXROTATIONANGLEY = 360; 
-    private final double MINROTATIONANGLEY = 1; 
+    private final double MINROTATIONANGLEY = 0; 
     
     //movement values (speed when walk, crouch and sprint)
-    private final double DEFAULTMOVEMENTSPEED = 20;
-    private double speedModifier = 5;
+    private final double DEFAULTMOVEMENTSPEED = 10;
+    private double speedModifier = 2;
     private double currentSpeed;
     
     static int invertedMouse =-1;
@@ -181,6 +185,7 @@ public class ArvenarGameGUI{
         btnPlayRandomly = arvbuttons.actionButtons(btnPlayRandomly, "Play random", arvfx.setGlowEffect(0.5), null, Font.font("Verdana", FontWeight.BOLD, 12), 10, 50);
         btnExitGame = arvbuttons.actionButtons(btnExitGame, "Exit game", arvfx.setGlowEffect(0.5), null, Font.font("Verdana", FontWeight.BOLD, 12), 0, 320);     
         
+               
         moveUpButton.setLayoutX(100); moveUpButton.setLayoutY(155);
         moveDownButton.setLayoutX(100); moveDownButton.setLayoutY(300);
         moveLeftButton.setLayoutX(25); moveLeftButton.setLayoutY(230);
@@ -216,16 +221,15 @@ public class ArvenarGameGUI{
         //SUBPANE for controls, compass and buttons
         controlsPane.setStyle("-fx-background-color: rgba(0, 50, 50, 0.6); -fx-background-radius: 8; -fx-padding: 10"); 
         controlsPane.setLayoutX(50); controlsPane.setLayoutY(300);
-        controlsPane.getChildren().addAll(btnPlayGame, btnPlayRandomly, btnExitGame, moveUpButton, moveDownButton, moveLeftButton, moveRightButton, compass3d);
-                
-        escPopUpVBox.setMaxSize(500, 300); escPopUpVBox.setMinSize(500, 300);
-        escPopUpVBox.setStyle("-fx-background-color: rgba(0, 50, 50, 0.6); -fx-background-radius: 5; -fx-padding: 20;");
-        escPopUpVBox.setSpacing(10); 
-        escPopUpVBox.setAlignment(Pos.CENTER);
-        escPopUpVBox.getChildren().addAll(escPopupHeadText, optReturnToGameText, optSettingsText, optExitToMainMenuText);
-        popupPane.setStyle("-fx-background-color: rgba(0, 50, 50, 0.6); -fx-background-radius: 5;");
+        controlsPane.getChildren().addAll(btnPlayGame, btnPlayRandomly, moveUpButton, moveDownButton, moveLeftButton, moveRightButton, compass3d);
         
-        popupPane.getChildren().add(escPopUpVBox);
+        //SUBPANE for console info
+        consoleInfoVBox.setStyle("-fx-background-color: rgba(0, 50, 50, 0.6); -fx-background-radius: 5; -fx-padding: 10; fx_spacing: 20"); 
+        consoleInfoVBox.setLayoutX(50); consoleInfoVBox.setLayoutY(50);
+        consoleInfoVBox.getChildren().addAll(consoleInfoText);
+        consoleInfoText = arvfx.setTextEffect(consoleInfoText, null, null, Font.font("Verdana", FontWeight.BOLD, 12), Color.BEIGE, 0, 0);
+               
+        popupPane.getChildren().add(dialog.showPopupWindow(escPopupHeadText, optReturnToGameText, optSettingsText, optExitToMainMenuText));
         
                 //GAMEMAINPANE - main pane 
         game2DUILayoutPane.setBackground(new Background(new BackgroundImage(bkgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT)));
@@ -235,7 +239,7 @@ public class ArvenarGameGUI{
         
         //addLights();
               
-        arvfx.buttonEffects(btnExitGame);
+        //arvfx.buttonEffects(btnExitGame);
         arvfx.buttonEffects(btnPlayGame);
         arvfx.buttonEffects(btnPlayRandomly);
         
@@ -246,9 +250,13 @@ public class ArvenarGameGUI{
     //*i have tryed to implement here also the mouse control rotation logic, so that we can use here the same code now
         gameMainScene.setOnKeyPressed((KeyEvent kevent)->{ 
         
-            printOutInfo();
+              
+            yzR = -Math.sin(angleWorldY.get())*10;
+            yxR = Math.cos(angleWorldY.get())*10;
             
-            currentSpeed = DEFAULTMOVEMENTSPEED;
+            showConsoleInfo();         
+            
+              currentSpeed = DEFAULTMOVEMENTSPEED;
                 
                 if(kevent.isShiftDown()) //run
                     {currentSpeed = DEFAULTMOVEMENTSPEED * speedModifier;}
@@ -260,8 +268,8 @@ public class ArvenarGameGUI{
                 case W:  
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, -1, Rotate.X_AXIS);
-                transform3d.move3DNodeZ(group3DWorld,translateWorld.getX()+Math.abs(angleWorldY.get()), translateWorld.getZ()-currentSpeed);
-                
+                translateWorld.setZ(translateWorld.getZ()+yzR);
+                translateWorld.setX(translateWorld.getX()+yxR);
                 break;
 
                 case S: 
@@ -374,13 +382,14 @@ public class ArvenarGameGUI{
         
             gameMainScene.setOnMouseDragged((MouseEvent mevent) -> {
                 
-                printOutInfo();
-                
                 angleWorldX.set(anchorAngleX - (mevent.getSceneY() - anchorY)*invertedMouse);
                 angleWorldY.set(anchorAngleY + (mevent.getSceneX() - anchorX)*invertedMouse);
-                yR = 360-angleWorldY.get();
                 
-                checkRotationAngles();
+                yzR = -Math.sin(angleWorldY.get())*10;
+                yxR = Math.sin(angleWorldY.get())*10;
+                
+                 checkRotationAngles();
+                 showConsoleInfo();
                                 
                 angleHeroX.set(angleWorldX.get()*2); //hero looks in the opposite direction of world
                 angleHeroY.set(angleWorldY.get()*2);
@@ -466,7 +475,7 @@ public class ArvenarGameGUI{
         clearDialogUI();
         clearGameUI();
         resetGameUI();
-        createControlGUI();
+        createGUIContent();
         createWorld();
                
     }
@@ -540,21 +549,20 @@ public class ArvenarGameGUI{
     
     public void checkRotationAngles(){ 
         
-        if (angleWorldX.get() > MAXROTATIONANGLEX){ //X-axis rotationangles shouldn't flip over -5 and 90 grades 
+        angleWorldX.set(angleWorldX.get() > MAXROTATIONANGLEX ? MAXROTATIONANGLEX : angleWorldX.get());
+        angleWorldX.set(angleWorldX.get() < MINROTATIONANGLEX ? MINROTATIONANGLEX : angleWorldX.get());
+        angleWorldY.set(angleWorldY.get() > MAXROTATIONANGLEY ? 1 : angleWorldY.get());
+        angleWorldY.set(angleWorldY.get() < MINROTATIONANGLEY ? 359 : angleWorldY.get());
+        
+        /*if (angleWorldX.get() > MAXROTATIONANGLEX){ //X-axis rotationangles shouldn't flip over -5 and 90 grades 
                     angleWorldX.set(MAXROTATIONANGLEX);
         } 
                 
         if (angleWorldX.get() < MINROTATIONANGLEX){
                     angleWorldX.set(MINROTATIONANGLEX);
         } 
-        
-        if (angleWorldY.get() > MAXROTATIONANGLEY){ //Y-axis restricted to rotationangles 0-360 grade
-                    //angleWorldY.set(MINROTATIONANGLEY);
-        } 
                 
-        if (angleWorldY.get() < MINROTATIONANGLEY){
-                    //angleWorldY.set(MAXROTATIONANGLEY);
-        }
+        }*/
         
     }
        
@@ -632,23 +640,9 @@ public class ArvenarGameGUI{
                 
     }
     
-    
-    void printOutInfo(){
-            System.out.println("World Z: "+translateWorld.getZ());
-            System.out.println("world X: "+translateWorld.getX());
-            
-            System.out.println("angleWorldX: "+angleWorldX.get());
-            System.out.println("angleWorldY: "+angleWorldY.get());
-            
-           // System.out.println("xRotateCam pivotX: "+xRotateCam.getPivotX());
-            //System.out.println("xRotateCam pivotZ: "+xRotateCam.getPivotZ());
-            //System.out.println("yRotateCam pivotX: "+yRotateCam.getPivotX());
-           // System.out.println("yRotateCam pivotZ: "+yRotateCam.getPivotZ());
-    }
-    
-    public void createControlGUI(){
+    public void createGUIContent(){
         
-        uiControlGroup.getChildren().addAll(controlsPane);
+        uiContentGroup.getChildren().addAll(controlsPane, consoleInfoVBox);
                         
     }
     
@@ -664,15 +658,26 @@ public class ArvenarGameGUI{
         
             group3DWorld.getChildren().clear();
             
-            uiControlGroup.getChildren().clear();
-            game2DUILayoutPane.getChildren().removeAll(controlsPane, subScene3DWorld, world3DPane, uiControlGroup, infoText);
+            uiContentGroup.getChildren().clear();
+            game2DUILayoutPane.getChildren().removeAll(controlsPane, consoleInfoVBox, subScene3DWorld, world3DPane, uiContentGroup, infoText);
                        
        }
    
        public void resetGameUI() throws FileNotFoundException{
        
-           game2DUILayoutPane.getChildren().addAll(controlsPane, subScene3DWorld, world3DPane, uiControlGroup, infoText); //...hogy mindig legfelülre kerüljön a controlPanelVBox layer
+           game2DUILayoutPane.getChildren().addAll(controlsPane, consoleInfoVBox, subScene3DWorld, world3DPane, uiContentGroup, infoText); //...hogy mindig legfelülre kerüljön a controlPanelVBox layer
            //weather.createAnimation(game2DUILayoutPane, 0, 0, 1920, 1080, (int)Math.round(Math.random()*2));
+       }
+       
+       void showConsoleInfo(){
+           consoleInfoText.setText("Console info:"+"\n"+
+                                    "World-Z-Axis: "+translateWorld.getZ()+"\n"+
+                                    "World X-Axis: "+translateWorld.getX()+"\n"+
+                                    "Pitch: "+angleWorldX.get()+"\n"+
+                                    "Yaw: "+angleWorldY.get()+"\n"+
+                                    "rCosX: "+yxR+"\n"+
+                                    "rSinZ: "+yzR+"\n");    
+           
        }
        
        public Scene game_Scene(){
