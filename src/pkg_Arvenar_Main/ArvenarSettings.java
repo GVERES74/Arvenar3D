@@ -154,9 +154,9 @@ public class ArvenarSettings {
         controlsPane.setMaxSize(350, 110); controlsPane.setMinSize(350, 110);
         controlsPane.setStyle("-fx-background-color: rgba(0, 50, 50, 0.2); -fx-background-radius: 5;");
         controlsGroupText.setLayoutX(10); controlsGroupText.setLayoutY(30);
-        lbInvertMouse.setLayoutX(10); lbInvertMouse.setLayoutY(40);
+        lbInvertMouse.setLayoutX(10); lbInvertMouse.setLayoutY(45);
         lbInvertMouse.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
-        lbInvertKeyBoard.setLayoutX(10); lbInvertKeyBoard.setLayoutY(60);
+        lbInvertKeyBoard.setLayoutX(10); lbInvertKeyBoard.setLayoutY(70);
         lbInvertKeyBoard.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
         cbInvertMouse.setLayoutX(150); cbInvertMouse.setLayoutY(40);
         cbInvertKeyBoard.setLayoutX(150); cbInvertKeyBoard.setLayoutY(65);

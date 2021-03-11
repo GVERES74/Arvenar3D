@@ -262,8 +262,8 @@ public class ArvenarGameGUI{
                 
 //                moveXDirection = currentSpeed * Math.cos(Math.toRadians(angleWorldY.get()));
 //                moveZDirection = currentSpeed * Math.sin(Math.toRadians(angleWorldY.get()));
-                moveZDirection = currentSpeed * Math.sin(Math.PI / 180 * angleWorldY.get());
-                moveXDirection = currentSpeed * Math.cos(Math.PI / 180 * angleWorldY.get());
+                moveXDirection = currentSpeed * Math.sin(Math.PI / 180 * angleWorldY.get());
+                moveZDirection = currentSpeed * Math.cos(Math.PI / 180 * angleWorldY.get());
                 
                 
             switch (kevent.getCode()){
@@ -271,8 +271,8 @@ public class ArvenarGameGUI{
                 case W:  
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, -1, Rotate.X_AXIS);
-                translateWorld.setZ(translateWorld.getZ()-moveXDirection);
-                translateWorld.setX(translateWorld.getX()+moveZDirection);
+                translateWorld.setZ(translateWorld.getZ()-moveZDirection);
+                translateWorld.setX(translateWorld.getX()+moveXDirection);
                 break;
 
                 case S: 
@@ -391,8 +391,8 @@ public class ArvenarGameGUI{
                 
 //                moveXDirection = 10 * Math.cos(Math.toRadians(angleWorldY.get()));
 //                moveZDirection = 10 * Math.sin(Math.toRadians(angleWorldY.get()));
-                moveZDirection = currentSpeed * Math.sin(Math.PI / 180 * angleWorldY.get());
-                moveXDirection = currentSpeed * Math.cos(Math.PI / 180 * angleWorldY.get());
+                moveXDirection = currentSpeed * Math.sin(Math.PI / 180 * angleWorldY.get());
+                moveZDirection = currentSpeed * Math.cos(Math.PI / 180 * angleWorldY.get());
                 
                  checkRotationAngles();
                  showConsoleInfo();

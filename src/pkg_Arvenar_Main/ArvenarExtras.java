@@ -48,9 +48,6 @@ public class ArvenarExtras {
     DisplayManager displayManager;
                           
     
-    int stageSizeX = displayManager.getResolutionX();
-    int stageSizeY = displayManager.getResolutionY();
-    
     
     public ArvenarExtras()throws Exception{
         
