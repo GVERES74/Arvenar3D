@@ -533,7 +533,7 @@ public class ArvenarGameGUI{
                xRotateCam = new Rotate(0,Rotate.X_AXIS);
                yRotateCam = new Rotate(0,Rotate.Y_AXIS);
                zRotateCam = new Rotate(0,Rotate.Z_AXIS); 
-               translateCam = new Translate(displayManager.getResolutionX()/2,0,2000);
+               translateCam = new Translate(displayManager.getResolutionX()/2,100,2500);
                
         cameraGroup.getTransforms().addAll(xRotateCam, yRotateCam, zRotateCam, translateCam);
                 
