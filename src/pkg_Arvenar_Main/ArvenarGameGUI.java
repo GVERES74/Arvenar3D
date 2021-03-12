@@ -114,7 +114,7 @@ public class ArvenarGameGUI{
     private double anchorX, anchorY;
     private double anchorAngleX = 0;
     private double anchorAngleY = 0;
-    private double moveZDirection, moveXDirection;
+    private double moveFwZDirection, moveFwXDirection, moveSideZDirection, moveSideXDirection;
     
     //min - max rotation angles (x,y)
     private final double MAXROTATIONANGLEX = 60; //does not flip over
@@ -260,40 +260,39 @@ public class ArvenarGameGUI{
                 if(kevent.isControlDown()) //crouch
                     {currentSpeed = DEFAULTMOVEMENTSPEED / speedModifier;}
                 
-//                moveXDirection = currentSpeed * Math.cos(Math.toRadians(angleWorldY.get()));
-//                moveZDirection = currentSpeed * Math.sin(Math.toRadians(angleWorldY.get()));
-                moveXDirection = currentSpeed * Math.sin(Math.PI / 180 * angleWorldY.get());
-                moveZDirection = currentSpeed * Math.cos(Math.PI / 180 * angleWorldY.get());
-                
-                
+                calculateMovementDirections();
+                                
             switch (kevent.getCode()){
                                                 
                 case W:  
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, -1, Rotate.X_AXIS);
-                translateWorld.setZ(translateWorld.getZ()-moveZDirection);
-                translateWorld.setX(translateWorld.getX()+moveXDirection);
+                translateWorld.setZ(translateWorld.getZ()-moveFwZDirection);
+                translateWorld.setX(translateWorld.getX()+moveFwXDirection);
+                               
                 break;
 
                 case S: 
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, 1, Rotate.X_AXIS);
-                translateWorld.setZ(translateWorld.getZ()+moveXDirection);
-                translateWorld.setX(translateWorld.getX()-moveZDirection);
+                translateWorld.setZ(translateWorld.getZ()+moveFwZDirection);
+                translateWorld.setX(translateWorld.getX()-moveFwXDirection);
                 
                                 
                 break;
 
                 case A: 
                 transform3d.rotateByXY(compass3d, 1, Rotate.Y_AXIS);
-                translateWorld.setX(translateWorld.getX()+currentSpeed);
+                translateWorld.setZ(translateWorld.getZ()+moveSideZDirection);
+                translateWorld.setX(translateWorld.getX()-moveSideXDirection);
                 
                 
                 break;
                                 
                 case D: 
                 transform3d.rotateByXY(compass3d, -1, Rotate.Y_AXIS);
-                translateWorld.setX(translateWorld.getX()-currentSpeed);
+                translateWorld.setZ(translateWorld.getZ()-moveSideZDirection);
+                translateWorld.setX(translateWorld.getX()+moveSideXDirection);
                                 
                 break;
                                 
@@ -389,13 +388,9 @@ public class ArvenarGameGUI{
                 angleWorldX.set(anchorAngleX - (mevent.getSceneY() - anchorY)*invertedMouse);
                 angleWorldY.set(anchorAngleY + (mevent.getSceneX() - anchorX)*invertedMouse);
                 
-//                moveXDirection = 10 * Math.cos(Math.toRadians(angleWorldY.get()));
-//                moveZDirection = 10 * Math.sin(Math.toRadians(angleWorldY.get()));
-                moveXDirection = currentSpeed * Math.sin(Math.PI / 180 * angleWorldY.get());
-                moveZDirection = currentSpeed * Math.cos(Math.PI / 180 * angleWorldY.get());
-                
-                 checkRotationAngles();
-                 showConsoleInfo();
+                calculateMovementDirections();
+                checkRotationAngles();
+                showConsoleInfo(); //only for developer mode
                                 
                 angleHeroX.set(angleWorldX.get()*2); //hero looks in the opposite direction of world
                 angleHeroY.set(angleWorldY.get()*2);
@@ -497,7 +492,7 @@ public class ArvenarGameGUI{
         xRotateHero.angleProperty().bind(angleHeroX);
         yRotateHero.angleProperty().bind(angleHeroY);
         
-    }
+        }
     
     public void initPerspectiveCamera(){
         playerCamera.setNearClip(0.1); // ha setNearClip(1.0), akkor üres kezdőháttered lesz!!
@@ -538,7 +533,7 @@ public class ArvenarGameGUI{
                xRotateCam = new Rotate(0,Rotate.X_AXIS);
                yRotateCam = new Rotate(0,Rotate.Y_AXIS);
                zRotateCam = new Rotate(0,Rotate.Z_AXIS); 
-               translateCam = new Translate(displayManager.getResolutionX()/2,0,displayManager.getResolutionY());
+               translateCam = new Translate(displayManager.getResolutionX()/2,0,2000);
                
         cameraGroup.getTransforms().addAll(xRotateCam, yRotateCam, zRotateCam, translateCam);
                 
@@ -570,6 +565,16 @@ public class ArvenarGameGUI{
                 
         }*/
         
+    }
+    
+    public void calculateMovementDirections(){
+        //      moveFwXDirection = 10 * Math.cos(Math.toRadians(angleWorldY.get()));
+        //      moveFwZDirection = 10 * Math.sin(Math.toRadians(angleWorldY.get()));
+                moveFwXDirection = currentSpeed * Math.sin(Math.PI / 180 * angleWorldY.get());
+                moveFwZDirection = currentSpeed * Math.cos(Math.PI / 180 * angleWorldY.get());
+                
+                moveSideXDirection = currentSpeed * Math.sin(Math.PI / 180 * (angleWorldY.get()-90));
+                moveSideZDirection = currentSpeed * Math.cos(Math.PI / 180 * (angleWorldY.get()-90));
     }
        
         
@@ -621,8 +626,7 @@ public class ArvenarGameGUI{
                 //NOT USED: heroImage = Arvenar3DObjects.heroImg;                
                 heroTooltipImageView = new ImageView(Arvenar3DObjects.heroImg);
                
-                group3DWorld.getChildren().add(player3D);
-                             
+                group3DWorld.getChildren().add(player3D);             
                 
                 infoText.setText("Hero "+objects3d.playerPC+" is playing on current map: "+dbaseMAPS.get_Random_Map().getMap_name()); //for selected map
                 
@@ -681,8 +685,8 @@ public class ArvenarGameGUI{
                                     "World X-Axis: "+translateWorld.getX()+"\n"+
                                     "Pitch: "+angleWorldX.get()+"\n"+
                                     "Yaw: "+angleWorldY.get()+"\n"+
-                                    "rCosX: "+moveXDirection+"\n"+
-                                    "rSinZ: "+moveZDirection+"\n"+
+                                    "rCosX: "+moveFwXDirection+"\n"+
+                                    "rSinZ: "+moveFwZDirection+"\n"+
                                     "Speed: "+currentSpeed);    
            
        }
