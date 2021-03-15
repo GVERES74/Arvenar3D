@@ -118,7 +118,7 @@ public class ArvenarGameGUI{
     
     //min - max rotation angles (x,y)
     private final double MAXROTATIONANGLEX = 60; //does not flip over
-    private final double MINROTATIONANGLEX = -20; //does not flip over
+    private final double MINROTATIONANGLEX = -40; //does not flip over
     private final double MAXROTATIONANGLEY = 360; 
     private final double MINROTATIONANGLEY = 0; 
     
@@ -269,6 +269,8 @@ public class ArvenarGameGUI{
                 transform3d.rotateByXY(compass3d, -1, Rotate.X_AXIS);
                 translateWorld.setZ(translateWorld.getZ()-moveFwZDirection);
                 translateWorld.setX(translateWorld.getX()+moveFwXDirection);
+//                translateCam.setZ(translateCam.getZ()-moveFwZDirection);
+//                translateCam.setX(translateCam.getX()+moveFwXDirection);
                                
                 break;
 
@@ -399,7 +401,7 @@ public class ArvenarGameGUI{
             
             gameMainScene.setOnScroll((ScrollEvent event) ->{
                 double deltaY = event.getDeltaY();
-                playerCamera.setTranslateY(playerCamera.getTranslateY()+deltaY);
+                playerCamera.setTranslateZ(playerCamera.getTranslateZ()+deltaY);
                                 
             });
         
@@ -437,13 +439,13 @@ public class ArvenarGameGUI{
             moveUpButton.setOnAction(action -> {
                 check_HeroPos();
                 playerCamera.translateZProperty().set(playerCamera.getTranslateZ()+100);
-                playerCamera.translateYProperty().set(playerCamera.getTranslateY()+10);
+//                playerCamera.translateYProperty().set(playerCamera.getTranslateY()+10);
             });
         
             moveDownButton.setOnAction(action -> {
                 check_HeroPos();
                 playerCamera.translateZProperty().set(playerCamera.getTranslateZ()-100);
-                playerCamera.translateYProperty().set(playerCamera.getTranslateY()-10);
+//                playerCamera.translateYProperty().set(playerCamera.getTranslateY()-10);
                 
             });
         
@@ -488,19 +490,22 @@ public class ArvenarGameGUI{
         
         xRotateWorld.angleProperty().bind(angleWorldX);
         yRotateWorld.angleProperty().bind(angleWorldY);
+//        xRotateCam.angleProperty().bind(angleWorldX);
+//        yRotateCam.angleProperty().bind(angleWorldY);
         
         xRotateHero.angleProperty().bind(angleHeroX);
         yRotateHero.angleProperty().bind(angleHeroY);
-        
+        player3D.translateXProperty().bind(playerCamera.translateXProperty());
+        player3D.translateZProperty().bind(playerCamera.translateZProperty());
         }
     
     public void initPerspectiveCamera(){
         playerCamera.setNearClip(0.1); // ha setNearClip(1.0), akkor üres kezdőháttered lesz!!
         playerCamera.setFarClip(150000);
-        playerCamera.setFieldOfView(40);
+        playerCamera.setFieldOfView(75);
                 
         cameraGroup.getChildren().addAll(playerCamera);
-        //group3DWorld.getChildren().addAll(cameraGroup);
+//        group3DWorld.getChildren().addAll(cameraGroup);
         subScene3DWorld.setCamera(playerCamera);
         
     };
@@ -533,9 +538,9 @@ public class ArvenarGameGUI{
                xRotateCam = new Rotate(0,Rotate.X_AXIS);
                yRotateCam = new Rotate(0,Rotate.Y_AXIS);
                zRotateCam = new Rotate(0,Rotate.Z_AXIS); 
-               translateCam = new Translate(displayManager.getResolutionX()/2,100,2500);
+               translateCam = new Translate(displayManager.getResolutionX()/2, 900, 5000);
                
-        cameraGroup.getTransforms().addAll(xRotateCam, yRotateCam, zRotateCam, translateCam);
+        playerCamera.getTransforms().addAll(xRotateCam, yRotateCam, zRotateCam, translateCam);
                 
     }
     
@@ -543,7 +548,7 @@ public class ArvenarGameGUI{
         
         xRotateHero = new Rotate(0,0,0,0,Rotate.X_AXIS);
         yRotateHero = new Rotate(0,0,0,0,Rotate.Y_AXIS);
-        translatePlayer = new Translate(0,-200,0);
+        translatePlayer = new Translate(0,0,2000);
                 
         player3D.getTransforms().addAll(xRotateHero, yRotateHero, translatePlayer);
     }
@@ -639,9 +644,10 @@ public class ArvenarGameGUI{
         obstacles3d.buildWalls(group3DWorld);
         obstacles3d.buildMesh(group3DWorld);
         obstacles3d.buildBush(group3DWorld);
+//        group3DWorld.getChildren().add(objects3d.object3DTerrain(100000, 5, 100000, -50000, -5, -50000, "grass.jpg"));
         
         group3DWorld.getChildren().add(objects3d.object3DWall(500, 2000, 300, 500, -1000, 600, "brickwall.jpg"));
-        //terrains3d.buildMeshTerrain(group3DWorld, -500, 0, 1000, 300, 500, "grass.jpg");
+//        terrains3d.buildMeshTerrain(group3DWorld, -500, 0, 1000, 300, 500, "grass.jpg");
         
         group3DWorld.getTransforms().addAll(new Translate(displayManager.getResolutionX()/2, displayManager.getResolutionY()-100, 5000));
         
@@ -687,7 +693,8 @@ public class ArvenarGameGUI{
                                     "Yaw: "+angleWorldY.get()+"\n"+
                                     "rCosX: "+moveFwXDirection+"\n"+
                                     "rSinZ: "+moveFwZDirection+"\n"+
-                                    "Speed: "+currentSpeed);    
+                                    "Speed: "+currentSpeed+"\n"+
+                                    "PlayerCamera Z: "+playerCamera.getTranslateZ());    
            
        }
        

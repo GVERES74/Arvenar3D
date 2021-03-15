@@ -19,16 +19,17 @@ public class Arvenar3DSkyBox {
     
     ImageView iwTop, iwLeft, iwFront, iwRight, iwBack, iwBottom;
     Image imTop, imLeft, imFront, imRight, imBack, imBottom;
-    String imagePath = "textures/skybox/sunny/";
+//    String imagePath = "textures/skybox/sunny/";
+    String imagePath = "textures/skybox/cloudy/";
     
     public Arvenar3DSkyBox(){
         
-     imTop = new Image(imagePath+"sky_top.png");   
-     imLeft = new Image(imagePath+"sky_left.png");   
-     imFront = new Image(imagePath+"sky_front.png");   
-     imRight = new Image(imagePath+"sky_right.png");   
-     imBack = new Image(imagePath+"sky_back.png");   
-     imBottom = new Image(imagePath+"sky_bottom.png");   
+     imTop = new Image(imagePath+"sky_top.jpg");   
+     imLeft = new Image(imagePath+"sky_left.jpg");   
+     imFront = new Image(imagePath+"sky_front.jpg");   
+     imRight = new Image(imagePath+"sky_right.jpg");   
+     imBack = new Image(imagePath+"sky_back.jpg");   
+     imBottom = new Image(imagePath+"sky_bottom.jpg");   
      
         iwTop = new ImageView(imTop); 
         iwLeft = new ImageView(imLeft);
