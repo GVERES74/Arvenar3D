@@ -34,7 +34,7 @@ public class Arvenar3DTerrains {
         int wDepth = 50000;
         
                
-         group.getChildren().add(objects3d.object3DTerrain(wWidth, wHeight, wDepth, xPos, yPos, zPos, "grass.jpg"));
+         group.getChildren().add(objects3d.object3DTerrain(wWidth, wHeight, wDepth, xPos, yPos, zPos, "grass.jpg", "bumpes.jpg"));
     }
     
     public void buildMeshTerrain(Group group, float top, float height, float width, int xPos, int zPos, String texture) throws FileNotFoundException{

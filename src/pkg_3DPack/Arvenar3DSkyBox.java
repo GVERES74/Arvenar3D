@@ -5,6 +5,7 @@
  */
 package pkg_3DPack;
 
+import java.util.Random;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
@@ -17,39 +18,42 @@ import javafx.scene.transform.Rotate;
  */
 public class Arvenar3DSkyBox {
     
-    ImageView iwTop, iwLeft, iwFront, iwRight, iwBack, iwBottom;
-    Image imTop, imLeft, imFront, imRight, imBack, imBottom;
-//    String imagePath = "textures/skybox/sunny/";
-    String imagePath = "textures/skybox/cloudy/";
     
+    String sbTexturePath = "textures/skybox/";
+    String sbImagePath;
+    Image cubeMapSideImage;
+    String[] cubeMapSideImageFileName = {"sky_top.png", "sky_left.png", "sky_front.png", "sky_right.png", "sky_back.png", "sky_bottom.png"};
+    ImageView iwTop, iwLeft, iwFront, iwRight, iwBack, iwBottom;
+    ImageView[] cubeMapSideImageView = {iwTop, iwLeft, iwFront, iwRight, iwBack, iwBottom};
+    //front and left must be mirrored / top must be rotated by 90 to the right 
+    
+    int worldSize = 100000;
+    
+    
+    
+    Random random = new Random();
+        
     public Arvenar3DSkyBox(){
         
-     imTop = new Image(imagePath+"sky_top.jpg");   
-     imLeft = new Image(imagePath+"sky_left.jpg");   
-     imFront = new Image(imagePath+"sky_front.jpg");   
-     imRight = new Image(imagePath+"sky_right.jpg");   
-     imBack = new Image(imagePath+"sky_back.jpg");   
-     imBottom = new Image(imagePath+"sky_bottom.jpg");   
-     
-        iwTop = new ImageView(imTop); 
-        iwLeft = new ImageView(imLeft);
-        iwFront = new ImageView(imFront);
-        iwRight = new ImageView(imRight);
-        iwBack = new ImageView(imBack);
-        iwBottom = new ImageView(imBottom);
+    changeSky();
         
     }
     
     public void buildSkyBox(Group group){
         
-        arrangeImageViews(iwTop, -50000, -75000, 0, 100000, 100000, 90, Rotate.X_AXIS);
-        arrangeImageViews(iwBottom, -50000, -50000, 0, 100000, 100000, 90, Rotate.X_AXIS);
-        arrangeImageViews(iwFront, -50000, -25000, -50000, 100000, 50000, 0, Rotate.Y_AXIS);
-        arrangeImageViews(iwBack, -50000, -25000, 50000, 100000, 50000, 0, Rotate.Y_AXIS);
-        arrangeImageViews(iwLeft, -100000, -25000, 0, 100000, 50000, 90, Rotate.Y_AXIS);
-        arrangeImageViews(iwRight, 0, -25000, 0, 100000, 50000, 90, Rotate.Y_AXIS);
+        arrangeImageViews(cubeMapSideImageView[0], -worldSize/2, -75000, 0, worldSize, worldSize, 90, Rotate.X_AXIS);
+        arrangeImageViews(cubeMapSideImageView[1], -worldSize, -worldSize/4, 0, worldSize, worldSize/2, 90, Rotate.Y_AXIS);
+        arrangeImageViews(cubeMapSideImageView[2], -worldSize/2, -worldSize/4, -worldSize/2, worldSize, worldSize/2, 0, Rotate.Y_AXIS);
+        arrangeImageViews(cubeMapSideImageView[3], 0, -worldSize/4, 0, worldSize, worldSize/2, 90, Rotate.Y_AXIS);
+        arrangeImageViews(cubeMapSideImageView[4], -worldSize/2, -worldSize/4, worldSize/2, worldSize, worldSize/2, 0, Rotate.Y_AXIS);
+        arrangeImageViews(cubeMapSideImageView[5], -worldSize/2, -worldSize/2, 0, worldSize, worldSize, 90, Rotate.X_AXIS);
         
-        group.getChildren().addAll(iwTop, iwLeft, iwFront, iwRight, iwBack, iwBottom);
+        group.getChildren().addAll(cubeMapSideImageView[0], cubeMapSideImageView[1], cubeMapSideImageView[2], cubeMapSideImageView[3], cubeMapSideImageView[4], cubeMapSideImageView[5]);
+    }
+    
+    public void clearSkyBox(Group group){
+        group.getChildren().removeAll(cubeMapSideImageView[0], cubeMapSideImageView[1], cubeMapSideImageView[2], cubeMapSideImageView[3], cubeMapSideImageView[4], cubeMapSideImageView[5]);
+        changeSky();
     }
     
     void arrangeImageViews(ImageView imW, int xPos, int yPos, int zPos, int width, int height, int rAngle, Point3D rAxis){
@@ -61,6 +65,25 @@ public class Arvenar3DSkyBox {
         imW.setRotate(rAngle);
         imW.setRotationAxis(rAxis);
         
+    }
+    
+    public String randomSky(){
+        
+        String[] skyType = {"sunny/", "cloudy/", "night/", "mountain/", "noon/"};
+        int counter = random.nextInt(5);
+        
+        return skyType[counter];
+      
+    }
+    
+    public void changeSky(){
+        sbImagePath = randomSky();   
+        for (int sideCount = 0; sideCount < cubeMapSideImageFileName.length; sideCount++){
+         
+         cubeMapSideImage = new Image(sbTexturePath+sbImagePath+cubeMapSideImageFileName[sideCount]);
+         cubeMapSideImageView[sideCount] = new ImageView(cubeMapSideImage);
+         
+     }
     }
     
 }

@@ -463,6 +463,9 @@ public class ArvenarGameGUI{
         
                
         btnPlayGame.setOnAction(action -> {
+            
+          skybox3d.clearSkyBox(group3DWorld);
+          skybox3d.buildSkyBox(group3DWorld);  
           
         });
               
@@ -644,7 +647,7 @@ public class ArvenarGameGUI{
         obstacles3d.buildWalls(group3DWorld);
         obstacles3d.buildMesh(group3DWorld);
         obstacles3d.buildBush(group3DWorld);
-//        group3DWorld.getChildren().add(objects3d.object3DTerrain(100000, 5, 100000, -50000, -5, -50000, "grass.jpg"));
+        //terrains3d.buildTerrain(group3DWorld);
         
         group3DWorld.getChildren().add(objects3d.object3DWall(500, 2000, 300, 500, -1000, 600, "brickwall.jpg"));
 //        terrains3d.buildMeshTerrain(group3DWorld, -500, 0, 1000, 300, 500, "grass.jpg");

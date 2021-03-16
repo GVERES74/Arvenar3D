@@ -48,6 +48,7 @@ public class Arvenar3DObjects {
     private String imagesDirectory = "src/img/";
     private String textureWallDirectory = "src/textures/walls/";
     private String texturePlantDirectory = "src/textures/plants/";
+    private String textureBumpMapDirectory = "src/textures/bumpmaps/";
     public Playable_Character pc = dbasePC.getRandomPC(); //declare the playable character
     public NPC npc = dbaseNPC.getRandomNPC(); //declare a non-playable character
     
@@ -111,14 +112,14 @@ public Sphere object3DCompass() throws FileNotFoundException{
     return compass3d;
 }
 
-public Box object3DTerrain(int width, int height, int depth, int xPos, int yPos, int zPos, String diffuseMap) throws FileNotFoundException{
+public Box object3DTerrain(int width, int height, int depth, int xPos, int yPos, int zPos, String diffuseMap, String bumpMap) throws FileNotFoundException{
     
     Box terrainName = new Box(width, height, depth);
     terrainName.getTransforms().addAll(new Translate(xPos, yPos, zPos));
         
     PhongMaterial groundType = new PhongMaterial();
     groundType.setDiffuseMap(new Image(new FileInputStream(imagesDirectory+diffuseMap)));
-    //groundType.setBumpMap(new Image(new FileInputStream(imagesDirectory+bumpMap)));
+    groundType.setBumpMap(new Image(new FileInputStream(textureBumpMapDirectory+bumpMap)));
     groundType.setSpecularColor(color);
     terrainName.setMaterial(groundType);
         
