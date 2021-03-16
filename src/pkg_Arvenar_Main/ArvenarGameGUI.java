@@ -131,8 +131,8 @@ public class ArvenarGameGUI{
     static int invertedKeyBoard =-1;
     
        
-    int playableScreenXSize; //(int)(ArvenarFXMain.stageElven.getWidth() / 2);
-    int playableScreenYSize; //(int)(ArvenarFXMain.stageElven.getHeight() / 2);
+    int playableScreenXSize; 
+    int playableScreenYSize;
     final int SCREEN_MAX_X;
     final int SCREEN_MAX_Y;
     final int SCREEN_MIN_X;
@@ -709,8 +709,8 @@ public class ArvenarGameGUI{
     public void showPauseMenuPopupPane(){
         
         if (!game2DUILayoutPane.getChildren().contains(popupPane)){ 
-            popupPane.setLayoutX((game2DUILayoutPane.getWidth()/2)-300);
-            popupPane.setLayoutY((game2DUILayoutPane.getHeight()/2)-250);
+            popupPane.setLayoutX((displayManager.getResolutionX()/2)-150);
+            popupPane.setLayoutY((displayManager.getResolutionY()/2)-100);
             game2DUILayoutPane.getChildren().add(popupPane);
             controlsPane.setDisable(true);
         }

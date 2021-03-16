@@ -146,7 +146,8 @@ public class ArvenarSettings {
         labelResolution.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
         cbFullScreen.setLayoutX(170); cbFullScreen.setLayoutY(38); cbFullScreen.setSelected(false);
         cbResolution.setLayoutX(170); cbResolution.setLayoutY(70);
-        cbResolution.getItems().add("1366x768"); cbResolution.getItems().add("1920x1080"); cbResolution.setValue("1366x768");
+        cbResolution.getItems().add("1366x768"); cbResolution.getItems().add("1920x1080"); 
+        cbResolution.setValue(displayManager.getResolutionX()+"x"+displayManager.getResolutionY());
         sceneText = arvfx.setTextEffect(sceneText, arvfx.setGlowEffect(0.5), null, Font.font("Verdana", FontWeight.BOLD, 36), Color.SILVER, 50, displayManager.getResolutionY()-200);
         video_pane.getChildren().addAll(videoGroupText, label_is_Fullscreen, cbFullScreen, labelResolution, cbResolution);
                 
@@ -357,8 +358,8 @@ public class ArvenarSettings {
     public void showMenuPopupPane(){
         
         if (!settingsMainPane.getChildren().contains(popUpPane)){ 
-            popUpPane.setLayoutX((settingsMainPane.getWidth()/2)-100);
-            popUpPane.setLayoutY((settingsMainPane.getHeight()/2)-100);
+            popUpPane.setLayoutX((displayManager.getResolutionX()/2)-100);
+            popUpPane.setLayoutY((displayManager.getResolutionY()/2)-100);
             settingsMainPane.getChildren().add(popUpPane);
             settingsGridPane.setDisable(true);
         }
