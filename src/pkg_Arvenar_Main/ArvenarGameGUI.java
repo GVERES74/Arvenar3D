@@ -152,8 +152,8 @@ public class ArvenarGameGUI{
     PerspectiveCamera playerCamera;
          
         
-    Rotate xRotateCam, yRotateCam, zRotateCam, xRotateWorld, yRotateWorld, zRotateWorld, xRotateHero, yRotateHero;
-    Translate translateCam, translateWorld, translatePlayer;
+    Rotate rotateCameraX, rotateCameraY, rotateCameraZ, rotateWorldX, rotateWorldY, zRotateWorld, rotatePlayerX, rotatePlayerY;
+    Translate translateCameraGroup, translateWorld, translatePlayer;
                     
     public ArvenarGameGUI() throws FileNotFoundException, InterruptedException{ //ez nem lehet void, különben üres stage-t kapsz vissza!!
         
@@ -267,10 +267,14 @@ public class ArvenarGameGUI{
                 case W:  
                 {check_HeroPos();}
                 transform3d.rotateByXY(compass3d, -1, Rotate.X_AXIS);
-                translateWorld.setZ(translateWorld.getZ()-moveFwZDirection);
-                translateWorld.setX(translateWorld.getX()+moveFwXDirection);
-//                translateCam.setZ(translateCam.getZ()-moveFwZDirection);
-//                translateCam.setX(translateCam.getX()+moveFwXDirection);
+                
+                //MOVE and ROTATE THE WORLD
+                  translateWorld.setZ(translateWorld.getZ()-moveFwZDirection);
+                  translateWorld.setX(translateWorld.getX()+moveFwXDirection);
+                
+                //MOVE and ROTATE THE CAMERA
+//                    translateCameraGroup.setZ(translateCameraGroup.getZ()-moveFwZDirection);
+//                    translateCameraGroup.setX(translateCameraGroup.getX()+moveFwXDirection);
                                
                 break;
 
@@ -285,8 +289,12 @@ public class ArvenarGameGUI{
 
                 case A: 
                 transform3d.rotateByXY(compass3d, 1, Rotate.Y_AXIS);
-                translateWorld.setZ(translateWorld.getZ()+moveSideZDirection);
-                translateWorld.setX(translateWorld.getX()-moveSideXDirection);
+                //MOVE and ROTATE THE WORLD
+                    translateWorld.setZ(translateWorld.getZ()+moveSideZDirection);
+                    translateWorld.setX(translateWorld.getX()-moveSideXDirection);
+                //MOVE and ROTATE THE CAMERA
+//                    translateCameraGroup.setZ(translateCameraGroup.getZ()+moveSideZDirection);
+//                    translateCameraGroup.setX(translateCameraGroup.getX()-moveSideXDirection);
                 
                 
                 break;
@@ -301,7 +309,7 @@ public class ArvenarGameGUI{
                 case UP:  
                            angleWorldX.set(angleWorldX.get()+invertedKeyBoard);
                            angleHeroX.set(angleWorldX.get()*2); //hero looks in the opposite direction of world
-                
+                                           
                 break;
                     
                 case DOWN: 
@@ -488,27 +496,28 @@ public class ArvenarGameGUI{
     
     
     public void createBindings(){ 
-    //HA nem bindel-ed a pivot point-okat, akkor jó a cameraZ irány, de a pivot marad 0,0
-    //HA bindel-ed a pivot point-okat, akkor NEM jó a cameraZ irány, de a pivot is megy
+          
+        //MOVE and ROTATE THE WORLD 
+          rotateWorldX.angleProperty().bind(angleWorldX);
+          rotateWorldY.angleProperty().bind(angleWorldY);
         
-        xRotateWorld.angleProperty().bind(angleWorldX);
-        yRotateWorld.angleProperty().bind(angleWorldY);
-//        xRotateCam.angleProperty().bind(angleWorldX);
-//        yRotateCam.angleProperty().bind(angleWorldY);
+        //MOVE and ROTATE THE CAMERA
+//            rotateCameraX.angleProperty().bind(angleWorldX);
+//            rotateCameraY.angleProperty().bind(angleWorldY);
+            
         
-        xRotateHero.angleProperty().bind(angleHeroX);
-        yRotateHero.angleProperty().bind(angleHeroY);
-        player3D.translateXProperty().bind(playerCamera.translateXProperty());
-        player3D.translateZProperty().bind(playerCamera.translateZProperty());
+        rotatePlayerX.angleProperty().bind(angleHeroX);
+        rotatePlayerY.angleProperty().bind(angleHeroY);
+        
         }
     
     public void initPerspectiveCamera(){
         playerCamera.setNearClip(0.1); // ha setNearClip(1.0), akkor üres kezdőháttered lesz!!
         playerCamera.setFarClip(150000);
-        playerCamera.setFieldOfView(75);
+        playerCamera.setFieldOfView(60);
                 
         cameraGroup.getChildren().addAll(playerCamera);
-//        group3DWorld.getChildren().addAll(cameraGroup);
+        //group3DWorld.getChildren().addAll(cameraGroup); //MOVE and ROTATE THE CAMERA
         subScene3DWorld.setCamera(playerCamera);
         
     };
@@ -526,34 +535,35 @@ public class ArvenarGameGUI{
     
     public void initWorldTransforms() { //applies both mouse and keyboard control
                      
-               xRotateWorld = new Rotate(0,Rotate.X_AXIS);
-               yRotateWorld = new Rotate(0,Rotate.Y_AXIS);
-               zRotateWorld = new Rotate(0,Rotate.Z_AXIS); 
+               rotateWorldX = new Rotate(0,Rotate.X_AXIS);
+               rotateWorldY = new Rotate(0,Rotate.Y_AXIS);
+               
                translateWorld = new Translate(0,0,0);
                
-        group3DWorld.getTransforms().addAll(xRotateWorld, yRotateWorld, zRotateWorld, translateWorld);
+        group3DWorld.getTransforms().addAll(rotateWorldX, rotateWorldY, translateWorld);
              
         }
     
     
     public void initCameraTransforms() { //applies both mouse and keyboard control
                      
-               xRotateCam = new Rotate(0,Rotate.X_AXIS);
-               yRotateCam = new Rotate(0,Rotate.Y_AXIS);
-               zRotateCam = new Rotate(0,Rotate.Z_AXIS); 
-               translateCam = new Translate(displayManager.getResolutionX()/2, 900, 5000);
+               rotateCameraX = new Rotate(0,0,0,0, Rotate.X_AXIS);
+               rotateCameraY = new Rotate(0,Rotate.Y_AXIS);
+               //rotateCameraZ = new Rotate(0,Rotate.Z_AXIS); 
+               translateCameraGroup = new Translate(displayManager.getResolutionX()/2, -500, 5000);
                
-        playerCamera.getTransforms().addAll(xRotateCam, yRotateCam, zRotateCam, translateCam);
+        playerCamera.getTransforms().addAll(rotateCameraX, rotateCameraY);
+        cameraGroup.getTransforms().addAll(translateCameraGroup);
                 
     }
     
     public void initPlayerTransforms(){
         
-        xRotateHero = new Rotate(0,0,0,0,Rotate.X_AXIS);
-        yRotateHero = new Rotate(0,0,0,0,Rotate.Y_AXIS);
+        rotatePlayerX = new Rotate(0,0,0,0,Rotate.X_AXIS);
+        rotatePlayerY = new Rotate(0,0,0,0,Rotate.Y_AXIS);
         translatePlayer = new Translate(0,0,2000);
                 
-        player3D.getTransforms().addAll(xRotateHero, yRotateHero, translatePlayer);
+        player3D.getTransforms().addAll(rotatePlayerX, rotatePlayerY, translatePlayer);
     }
     
     public void checkRotationAngles(){ 
@@ -576,13 +586,18 @@ public class ArvenarGameGUI{
     }
     
     public void calculateMovementDirections(){
-        //      moveFwXDirection = 10 * Math.cos(Math.toRadians(angleWorldY.get()));
-        //      moveFwZDirection = 10 * Math.sin(Math.toRadians(angleWorldY.get()));
-                moveFwXDirection = currentSpeed * Math.sin(Math.PI / 180 * angleWorldY.get());
-                moveFwZDirection = currentSpeed * Math.cos(Math.PI / 180 * angleWorldY.get());
+              
+        //MOVE THE camera(group)
+//            moveFwXDirection = currentSpeed * Math.cos(Math.toRadians(angleWorldY.get()-90));
+//            moveFwZDirection = currentSpeed * Math.sin(Math.toRadians(angleWorldY.get()-90));
+//            moveSideXDirection = currentSpeed * Math.cos(Math.PI / 180 * (angleWorldY.get()));
+//            moveSideZDirection = currentSpeed * Math.sin(Math.PI / 180 * (angleWorldY.get()));
                 
-                moveSideXDirection = currentSpeed * Math.sin(Math.PI / 180 * (angleWorldY.get()-90));
-                moveSideZDirection = currentSpeed * Math.cos(Math.PI / 180 * (angleWorldY.get()-90));
+        //MOVE THE WORLD
+            moveFwXDirection = currentSpeed * Math.sin(Math.PI / 180 * angleWorldY.get());
+            moveFwZDirection = currentSpeed * Math.cos(Math.PI / 180 * angleWorldY.get());
+            moveSideXDirection = currentSpeed * Math.sin(Math.PI / 180 * (angleWorldY.get()-90));
+            moveSideZDirection = currentSpeed * Math.cos(Math.PI / 180 * (angleWorldY.get()-90));
     }
        
         
