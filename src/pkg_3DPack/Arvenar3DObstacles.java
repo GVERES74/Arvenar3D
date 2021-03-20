@@ -27,7 +27,7 @@ public class Arvenar3DObstacles {
     
     public void buildWalls(Group group) throws FileNotFoundException{
         
-        for (int i=0; i< 50;i++){
+        for (int i=0; i< 20;i++){
             
             int wWidth = random.nextInt(800)+300;
             int wHeight = random.nextInt(800)+300;
@@ -55,20 +55,46 @@ public class Arvenar3DObstacles {
         }
     }
     
+    public void buildTowers(Group group) throws FileNotFoundException{
         
-    public void buildMesh(Group group) throws FileNotFoundException{
-        
-        for (int i=0; i< 50;i++){
+        for (int i=0; i< 20;i++){
             
-            int fWidth = 300;
-            int fHeight = 300;
-            float top = 0;
+            int tRadius = random.nextInt(800)+300;
+            int tHeight = random.nextInt(800)+300;
+            int tDivs = random.nextInt(12)+6;
 
             int xPos = random.nextInt(20000 + 20000) -20000; //range beetwen -20.000 and 20.000
+            int yPos = -tHeight/2; //buildings stand on the groud from Y=0
             int zPos = random.nextInt(20000 + 20000) -20000;
-                                                            
-            group.getChildren().add(objects3d.object3DMesh(top, fHeight, fWidth, xPos, zPos, "brickwall.jpg"));
+            int textureType = random.nextInt(4);
+                switch (textureType){
+                    case 0:  wallTextureFile = "brickwall.jpg";
+                    break;
+                    case 1:  wallTextureFile = "stonewall.jpg";
+                    break;
+                    case 2:  wallTextureFile = "oldbrick.jpg";
+                    break;
+                    case 3:  wallTextureFile = "stonetile.jpg";
+                    break;
+                }
+                    
+            
+            
+                    // W       H       D    X    Y   Z   texture(diffMap) file bumpMap
+            group.getChildren().add(objects3d.object3DTower(tRadius, tHeight, tDivs, xPos, yPos, zPos, wallTextureFile));
         }
+    }
+    
+        
+    public void buildMeshCube(Group group) throws FileNotFoundException{
+        
+                    
+            int cWidth = 50000;
+            int cHeight = 50000;
+            int cDepth = 50000;
+
+                                                                        
+            group.getChildren().add(objects3d.object3DMesh(cWidth, cHeight, cDepth, 0, -cHeight*2, 0, "skyworld.png"));
     }
     
     

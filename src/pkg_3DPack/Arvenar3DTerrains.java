@@ -7,7 +7,6 @@ package pkg_3DPack;
 
 import java.io.FileNotFoundException;
 import javafx.scene.Group;
-import javafx.scene.shape.TriangleMesh;
 
 /**
  *
@@ -37,9 +36,9 @@ public class Arvenar3DTerrains {
          group.getChildren().add(objects3d.object3DTerrain(wWidth, wHeight, wDepth, xPos, yPos, zPos, "grass.jpg", "bumpes.jpg"));
     }
     
-    public void buildMeshTerrain(Group group, float top, float height, float width, int xPos, int zPos, String texture) throws FileNotFoundException{
+    public void buildMeshCube(Group group, float xw, float yh, float zd, int xPos, int yPos, int zPos, String texture) throws FileNotFoundException{
         
-        group.getChildren().add(objects3d.object3DMesh(top, height, width, xPos, zPos, texture));
+        group.getChildren().add(objects3d.object3DMesh(xw, yh, zd, xPos, yPos, zPos, texture));
     }
         
 }

@@ -5,6 +5,7 @@
  */
 package pkg_3DPack;
 
+import java.io.FileNotFoundException;
 import java.util.Random;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
@@ -18,7 +19,7 @@ import javafx.scene.transform.Rotate;
  */
 public class Arvenar3DSkyBox {
     
-    
+    Arvenar3DObjects objects3d;
     String sbTexturePath = "textures/skybox/";
     String sbImagePath;
     Image cubeMapSideImage;
@@ -37,6 +38,18 @@ public class Arvenar3DSkyBox {
         
     changeSky();
         
+    }
+    
+    
+    public void buildMeshCubeMapSkyWorld(Group group) throws FileNotFoundException{
+             
+        objects3d = new Arvenar3DObjects();
+            int cWidth = worldSize;
+            int cHeight = worldSize;
+            int cDepth = worldSize;
+
+                                                                        
+            group.getChildren().add(objects3d.object3DMesh(cWidth, cHeight, cDepth, -25000, -cHeight, 0, "skyworld.png"));
     }
     
     public void buildSkyBox(Group group){
@@ -69,8 +82,8 @@ public class Arvenar3DSkyBox {
     
     public String randomSky(){
         
-        String[] skyType = {"sunny/", "cloudy/", "night/", "mountain/", "noon/"};
-        int counter = random.nextInt(5);
+        String[] skyType = {"sunny/", "cloudy/", "night/", "mountain/", "noon/", "daylight/"};
+        int counter = random.nextInt(6);
         
         return skyType[counter];
       

@@ -13,6 +13,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.Cylinder;
+import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Sphere;
 import javafx.scene.shape.TriangleMesh;
@@ -126,50 +127,76 @@ public Box object3DTerrain(int width, int height, int depth, int xPos, int yPos,
     return terrainName;
 }
 
-public Box object3DWall(int width, int height, int depth, int xPos, int yPos, int zPos, String diffuseMap, String bumpMap) throws FileNotFoundException{
+public Cylinder object3DTower(int radius, int height, int divs, int xPos, int yPos, int zPos, String diffuseMap) throws FileNotFoundException{
     
-    Box wallName = new Box(width, height, depth);
-    wallName.getTransforms().addAll(new Translate(xPos, yPos, zPos));
+    Cylinder tower = new Cylinder(radius, height, divs);
+    tower.getTransforms().addAll(new Translate(xPos, yPos, zPos));
         
-    PhongMaterial wallPaper = new PhongMaterial();
-    wallPaper.setDiffuseMap(new Image(new FileInputStream(imagesDirectory+diffuseMap)));
-    wallPaper.setBumpMap(new Image(new FileInputStream(imagesDirectory+bumpMap)));
+    PhongMaterial texture = new PhongMaterial();
+    texture.setDiffuseMap(new Image(new FileInputStream(textureWallDirectory+diffuseMap)));
+//    wallPaper.setBumpMap(new Image(new FileInputStream(imagesDirectory+bumpMap)));
     //wallpaper.setSpecularColor(color);
-    wallName.setMaterial(wallPaper);
+    tower.setMaterial(texture);
         
-    return wallName;
+    return tower;
 }
 
-public MeshView object3DMesh(float top, float height, float width, int xPos, int zPos, String diffuseMap) throws FileNotFoundException{
+public MeshView object3DMesh(float xWidth, float yHeight, float zDepth, int xPos, int yPos, int zPos, String diffuseMap) throws FileNotFoundException{
     
     TriangleMesh triMesh = new TriangleMesh();
-    triMesh.getTexCoords().addAll(0,0);
+    triMesh.getTexCoords().addAll(
+            0.25f, 0,       //T0
+            0.5f, 0,        //T1
+            0, 0.25f,       //T2
+            0.25f, 0.25f,   //T3
+            0.5f, 0.25f,    //T4
+            0.75f, 0.25f,   //T5
+            1, 0.25f,       //T6
+            0, 0.5f,        //T7
+            0.25f, 0.5f,    //T8
+            0.5f, 0.5f,     //T9
+            0.75f, 0.5f,    //T10
+            1, 0.5f,        //T11
+            0.25f, 0.75f,   //T12
+            0.5f, 0.75f     //T13
+    );
         
         triMesh.getPoints().addAll(
-                top, top, top,
-                top, height, -width/2,
-                -width/2, height, top,
-                width/2, height, top,
-                top, height, width/2
+                0, 0, zDepth,
+                xWidth, 0, zDepth,
+                0, yHeight, zDepth,
+                xWidth, yHeight, zDepth,
+                0, 0, 0,
+                xWidth, 0, 0,
+                0, yHeight, 0,
+                xWidth, yHeight, 0
         );
         
         triMesh.getFaces().addAll(
-                0,0,  2,0,  1,0,          // Front left face
-                0,0,  1,0,  3,0,          // Front right face
-                0,0,  3,0,  4,0,          // Back right face
-                0,0,  4,0,  2,0,          // Back left face
-                4,0,  1,0,  2,0,          // Bottom rear face
-                4,0,  3,0,  1,0           // Bottom front face  
+             5,1,4,0,0,3     //P5,T1 ,P4,T0  ,P0,T3
+            ,5,1,0,3,1,4    //P5,T1 ,P0,T3  ,P1,T4
+            ,0,3,4,2,6,7    //P0,T3 ,P4,T2  ,P6,T7
+            ,0,3,6,7,2,8    //P0,T3 ,P6,T7  ,P2,T8
+            ,1,4,0,3,2,8    //P1,T4 ,P0,T3  ,P2,T8
+            ,1,4,2,8,3,9    //P1,T4 ,P2,T8  ,P3,T9
+            ,5,5,1,4,3,9    //P5,T5 ,P1,T4  ,P3,T9
+            ,5,5,3,9,7,10   //P5,T5 ,P3,T9  ,P7,T10
+            ,4,6,5,5,7,10   //P4,T6 ,P5,T5  ,P7,T10
+            ,4,6,7,10,6,11  //P4,T6 ,P7,T10 ,P6,T11
+            ,3,9,2,8,6,12   //P3,T9 ,P2,T8  ,P6,T12
+            ,3,9,6,12,7,13  //P3,T9 ,P6,T12 ,P7,T13 
         );
         
     
         MeshView triangleMesh = new MeshView(triMesh);
         PhongMaterial groundType = new PhongMaterial();
-        groundType.setDiffuseMap(new Image(new FileInputStream(textureWallDirectory+diffuseMap)));
+        groundType.setDiffuseMap(new Image(new FileInputStream("src/textures/skybox/"+diffuseMap)));
         //groundType.setBumpMap(new Image(new FileInputStream(imagesDirectory+bumpMap)));
         //groundType.setSpecularColor(color);
         triangleMesh.setMaterial(groundType);
-        triangleMesh.getTransforms().addAll(new Translate(xPos, -height, zPos));
+        
+               
+        triangleMesh.getTransforms().addAll(new Translate(xPos, yPos, zPos));
 
         return triangleMesh;
 }
