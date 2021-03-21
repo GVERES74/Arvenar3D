@@ -538,7 +538,7 @@ public class ArvenarGameGUI{
                rotateWorldX = new Rotate(0,Rotate.X_AXIS);
                rotateWorldY = new Rotate(0,Rotate.Y_AXIS);
                
-               translateWorld = new Translate(0,0,0);
+               translateWorld = new Translate(0,0,0); //center of the world
                
         group3DWorld.getTransforms().addAll(rotateWorldX, rotateWorldY, translateWorld);
              
@@ -550,7 +550,7 @@ public class ArvenarGameGUI{
                rotateCameraX = new Rotate(0,0,0,0, Rotate.X_AXIS);
                rotateCameraY = new Rotate(0,Rotate.Y_AXIS);
                //rotateCameraZ = new Rotate(0,Rotate.Z_AXIS); 
-               translateCameraGroup = new Translate(displayManager.getResolutionX()/2, -500, 5000);
+               translateCameraGroup = new Translate(displayManager.getResolutionX()/2, -200, 50000);
                
         playerCamera.getTransforms().addAll(rotateCameraX, rotateCameraY);
         cameraGroup.getTransforms().addAll(translateCameraGroup);
@@ -662,12 +662,12 @@ public class ArvenarGameGUI{
         obstacles3d.buildWalls(group3DWorld);
         skybox3d.buildMeshCubeMapSkyWorld(group3DWorld);
         obstacles3d.buildBush(group3DWorld);
-        //terrains3d.buildTerrain(group3DWorld);
+        terrains3d.buildTerrain(group3DWorld);
         
         
 //        terrains3d.buildMeshCube(group3DWorld, -500, 0, 1000, 300, 500, "grass.jpg");
         
-        group3DWorld.getTransforms().addAll(new Translate(displayManager.getResolutionX()/2, displayManager.getResolutionY()-100, 5000));
+        group3DWorld.getTransforms().addAll(new Translate(displayManager.getResolutionX()/2, 0, 50000));
         
         addHero();
         addPirates();

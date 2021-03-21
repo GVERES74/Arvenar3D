@@ -28,9 +28,9 @@ public class Arvenar3DTerrains {
         int xPos = 0;
         int yPos = -5;
         int zPos = 0;
-        int wWidth = 50000;
+        int wWidth = 100000;
         int wHeight = 5;
-        int wDepth = 50000;
+        int wDepth = 100000;
         
                
          group.getChildren().add(objects3d.object3DTerrain(wWidth, wHeight, wDepth, xPos, yPos, zPos, "grass.jpg", "bumpes.jpg"));

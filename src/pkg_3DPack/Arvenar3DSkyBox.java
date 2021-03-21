@@ -45,11 +45,11 @@ public class Arvenar3DSkyBox {
              
         objects3d = new Arvenar3DObjects();
             int cWidth = worldSize;
-            int cHeight = worldSize;
+            int cHeight = worldSize/2;
             int cDepth = worldSize;
 
                                                                         
-            group.getChildren().add(objects3d.object3DMesh(cWidth, cHeight, cDepth, -25000, -cHeight, 0, "skyworld.png"));
+            group.getChildren().add(objects3d.object3DMesh(cWidth, cHeight, cDepth, -cWidth/2, -cHeight/2, -cDepth/2, "skyworld.png"));
     }
     
     public void buildSkyBox(Group group){
