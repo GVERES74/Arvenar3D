@@ -23,11 +23,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -474,7 +469,7 @@ public class ArvenarGameGUI{
         btnPlayGame.setOnAction(action -> {
             
           skybox3d.clearSkyBox(group3DWorld);
-          skybox3d.buildSkyBox(group3DWorld);  
+          skybox3d.buildImgViewSkyBox(group3DWorld);  
           
         });
               
@@ -658,14 +653,16 @@ public class ArvenarGameGUI{
        
     public void createWorld() throws FileNotFoundException{
               
-        //skybox3d.buildSkyBox(group3DWorld);
+        //skybox3d.buildImgViewSkyBox(group3DWorld);
+        //skybox3d.buildMeshViewCubeMapSkyBox(group3DWorld);
         obstacles3d.buildWalls(group3DWorld);
-        skybox3d.buildMeshCubeMapSkyWorld(group3DWorld);
         obstacles3d.buildBush(group3DWorld);
-        terrains3d.buildTerrain(group3DWorld);
+        obstacles3d.buildMeshCube(group3DWorld);
+        //terrains3d.buildTerrain(group3DWorld);
         
         
-//        terrains3d.buildMeshCube(group3DWorld, -500, 0, 1000, 300, 500, "grass.jpg");
+        
+        terrains3d.buildMeshTerrain(group3DWorld, 1000, 10, 1000, 0, 0, 0);
         
         group3DWorld.getTransforms().addAll(new Translate(displayManager.getResolutionX()/2, 0, 50000));
         

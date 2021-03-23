@@ -19,7 +19,7 @@ import javafx.scene.transform.Rotate;
  */
 public class Arvenar3DSkyBox {
     
-    Arvenar3DObjects objects3d;
+    Arvenar3DMeshes mesh3d;
     String sbTexturePath = "textures/skybox/";
     String sbImagePath;
     Image cubeMapSideImage;
@@ -30,8 +30,6 @@ public class Arvenar3DSkyBox {
     
     int worldSize = 100000;
     
-    
-    
     Random random = new Random();
         
     public Arvenar3DSkyBox(){
@@ -41,18 +39,18 @@ public class Arvenar3DSkyBox {
     }
     
     
-    public void buildMeshCubeMapSkyWorld(Group group) throws FileNotFoundException{
+    public void buildMeshViewCubeMapSkyBox(Group group) throws FileNotFoundException{
              
-        objects3d = new Arvenar3DObjects();
+        mesh3d = new Arvenar3DMeshes();
             int cWidth = worldSize;
             int cHeight = worldSize/2;
             int cDepth = worldSize;
 
                                                                         
-            group.getChildren().add(objects3d.object3DMesh(cWidth, cHeight, cDepth, -cWidth/2, -cHeight/2, -cDepth/2, "skyworld.png"));
+            group.getChildren().add(mesh3d.object3DCubeMesh(cWidth, cHeight, cDepth, -cWidth/2, -cHeight/2, -cDepth/2, "src/textures/skybox/skyworld.png"));
     }
     
-    public void buildSkyBox(Group group){
+    public void buildImgViewSkyBox(Group group){
         
         arrangeImageViews(cubeMapSideImageView[0], -worldSize/2, -75000, 0, worldSize, worldSize, 90, Rotate.X_AXIS);
         arrangeImageViews(cubeMapSideImageView[1], -worldSize, -worldSize/4, 0, worldSize, worldSize/2, 90, Rotate.Y_AXIS);

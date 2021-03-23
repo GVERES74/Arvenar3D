@@ -16,6 +16,7 @@ import javafx.scene.Group;
 public class Arvenar3DObstacles {
     
     Arvenar3DObjects objects3d;
+    Arvenar3DMeshes mesh3d;
     Random random = new Random();
     String wallTextureFile;
     String bushTextureFile;
@@ -40,11 +41,11 @@ public class Arvenar3DObstacles {
                 switch (wallType){
                     case 0:  wallTextureFile = "brickwall.jpg";
                     break;
-                    case 1:  wallTextureFile = "stonewall.jpg";
+                    case 1:  wallTextureFile = "house3.jpg";
                     break;
-                    case 2:  wallTextureFile = "oldbrick.jpg";
+                    case 2:  wallTextureFile = "house2.jpg";
                     break;
-                    case 3:  wallTextureFile = "stonetile.jpg";
+                    case 3:  wallTextureFile = "house.jpg";
                     break;
                 }
                     
@@ -88,13 +89,13 @@ public class Arvenar3DObstacles {
         
     public void buildMeshCube(Group group) throws FileNotFoundException{
         
-                    
-            int cWidth = 50000;
-            int cHeight = 50000;
-            int cDepth = 50000;
+            mesh3d = new Arvenar3DMeshes();        
+            int cWidth = 5000;
+            int cHeight = 5000;
+            int cDepth = 8000;
 
                                                                         
-            group.getChildren().add(objects3d.object3DMesh(cWidth, cHeight, cDepth, 0, -cHeight*2, 0, "skyworld.png"));
+            group.getChildren().add(mesh3d.object3DCubeMesh(cWidth, cHeight, cDepth, 2000, -cHeight, -2000, "src/textures/walls/house.jpg"));
     }
     
     
